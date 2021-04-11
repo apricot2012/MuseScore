@@ -26,7 +26,7 @@ Rectangle {
 
             width: 160
 
-            text: qsTrc("appshell", "Reset preferences")
+            text: qsTrc("appshell", "Reset factory settings")
 
             onClicked: {
                 root.revertFactorySettingsRequested()

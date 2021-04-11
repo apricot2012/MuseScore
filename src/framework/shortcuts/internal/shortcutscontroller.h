@@ -23,14 +23,14 @@
 #include "modularity/ioc.h"
 #include "ishortcutsregister.h"
 #include "actions/iactionsdispatcher.h"
-#include "ui/iuiactionsregister.h"
+#include "actions/iactionsregister.h"
 
 namespace mu::shortcuts {
 class ShortcutsController : public IShortcutsController
 {
     INJECT(shortcuts, IShortcutsRegister, shortcutsRegister)
     INJECT(shortcuts, actions::IActionsDispatcher, dispatcher)
-    INJECT(shortcuts, ui::IUiActionsRegister, aregister)
+    INJECT(shortcuts, actions::IActionsRegister, aregister)
 
 public:
     ShortcutsController() = default;

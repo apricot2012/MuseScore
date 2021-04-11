@@ -129,9 +129,7 @@
 #include "stubs/languages/languagesstubmodule.h"
 #endif
 
-#ifdef BUILD_AUTOBOT_MODULE
 #include "autobot/autobotmodule.h"
-#endif
 
 #else
 #include "wasmtest/wasmtestmodule.h"
@@ -210,7 +208,6 @@ int main(int argc, char** argv)
 #else
     app.addModule(new mu::instruments::InstrumentsStubModule());
 #endif
-
 #ifdef BUILD_VST
     app.addModule(new mu::vst::VSTModule());
 #endif
@@ -260,9 +257,7 @@ int main(int argc, char** argv)
     app.addModule(new mu::languages::LanguagesStubModule());
 #endif
 
-#ifdef BUILD_AUTOBOT_MODULE
     app.addModule(new mu::autobot::AutobotModule());
-#endif
 
 #else
     app.addModule(new mu::wasmtest::WasmTestModule());

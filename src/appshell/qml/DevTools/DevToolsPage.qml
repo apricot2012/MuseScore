@@ -12,7 +12,6 @@ import "./Interactive"
 import "./NotationDialogs"
 import "./Telemetry"
 import "./VST"
-import "./KeyNav"
 
 DockPage {
     id: homePage
@@ -46,11 +45,10 @@ DockPage {
                         { "name": "telemetry", "title": "Telemetry" },
                         { "name": "audio", "title": "Audio" },
                         { "name": "synth", "title": "Synth" },
-                        { "name": "midiports", "title": "MIDI ports" },
+                        { "name": "midiports", "title": "Midi ports" },
                         { "name": "vst", "title": "VST" },
                         { "name": "plugins", "title": "Plugins" },
-                        { "name": "autobot", "title": "Autobot" },
-                        { "name": "keynav", "title": "KeyNav" }
+                        { "name": "autobot", "title": "Autobot" }
                     ]
 
                     onSelected: {
@@ -80,8 +78,7 @@ DockPage {
             case "midiports": currentComp = midiPortsComp; break
             case "vst": currentComp = vstComponent; break
             case "plugins": currentComp = pluginsComp; break
-            case "autobot": currentComp = autobotComp; break
-            case "keynav": currentComp = keynavComp; break
+            case "autobot": api.launcher.open("musescore://autobot/main"); break
             }
         }
 
@@ -152,13 +149,7 @@ DockPage {
     Component {
         id: autobotComp
         Loader {
-            source: "qrc:/qml/DevTools/Autobot/AutobotControl.qml"
+            source: "qrc:/qml/DevTools/Autobot/AutobotPanel.qml"
         }
     }
-
-    Component {
-        id: keynavComp
-        KeyNavExample{}
-    }
-
 }

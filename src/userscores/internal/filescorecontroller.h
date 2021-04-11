@@ -25,6 +25,7 @@
 #include "iinteractive.h"
 #include "actions/actionable.h"
 #include "actions/iactionsdispatcher.h"
+#include "actions/iactionsregister.h"
 #include "async/asyncable.h"
 #include "notation/inotationcreator.h"
 #include "context/iglobalcontext.h"
@@ -33,6 +34,7 @@ namespace mu::userscores {
 class FileScoreController : public IFileScoreController, public actions::Actionable, public async::Asyncable
 {
     INJECT(scores, actions::IActionsDispatcher, dispatcher)
+    INJECT(scores, actions::IActionsRegister, actionsRegister)
     INJECT(scores, framework::IInteractive, interactive)
     INJECT(scores, notation::INotationCreator, notationCreator)
     INJECT(scores, context::IGlobalContext, globalContext)
@@ -42,6 +44,9 @@ public:
     void init();
 
     Ret openScore(const io::path& scorePath) override;
+
+    bool actionAvailable(const actions::ActionCode& actionCode) const override;
+    async::Channel<actions::ActionCodeList> actionsAvailableChanged() const override;
 
 private:
     void setupConnections();
@@ -78,6 +83,8 @@ private:
     bool isScoreOpened() const;
     bool isNeedSaveScore() const;
     bool hasSelection() const;
+
+    async::Channel<actions::ActionCodeList> m_actionsReceiveAvailableChanged;
 };
 }
 

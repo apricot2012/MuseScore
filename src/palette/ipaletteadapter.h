@@ -26,7 +26,7 @@
 #include "retval.h"
 
 #include "async/notification.h"
-#include "ui/uitypes.h"
+#include "actions/actiontypes.h"
 
 namespace Ms {
 class Element;
@@ -43,7 +43,7 @@ class IPaletteAdapter : MODULE_EXPORT_INTERFACE
 public:
     virtual ~IPaletteAdapter() = default;
 
-    virtual const ui::UiAction& getAction(const actions::ActionCode& code) const = 0;
+    virtual actions::ActionItem getAction(const actions::ActionCode& code) const = 0;
 
     virtual void showMasterPalette(const QString&) = 0;
 

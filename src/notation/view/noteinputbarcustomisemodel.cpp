@@ -25,16 +25,15 @@
 
 #include "internal/abstractnoteinputbaritem.h"
 #include "internal/actionnoteinputbaritem.h"
-#include "internal/notationuiactions.h"
+#include "internal/notationactions.h"
 #include "workspace/workspacetypes.h"
 
 #include "uicomponents/view/itemmultiselectionmodel.h"
 
 using namespace mu::notation;
 using namespace mu::workspace;
-using namespace mu::ui;
-using namespace mu::uicomponents;
 using namespace mu::actions;
+using namespace mu::uicomponents;
 
 static const std::string NOTE_INPUT_TOOLBAR_NAME("noteInput");
 
@@ -86,6 +85,17 @@ bool NoteInputBarCustomiseModel::moveRows(const QModelIndex& sourceParent, int s
     return true;
 }
 
+static std::optional<size_t> indexOf(const ActionList& actions, const ActionCode& actionCode)
+{
+    for (size_t i = 0; i < actions.size(); ++i) {
+        if (actions[i].code == actionCode) {
+            return i;
+        }
+    }
+
+    return std::nullopt;
+}
+
 void NoteInputBarCustomiseModel::load()
 {
     m_actions.clear();
@@ -98,8 +108,7 @@ void NoteInputBarCustomiseModel::load()
     }
 
     for (const ActionCode& actionCode: actions) {
-        UiAction action = actionsRegister()->action(actionCode);
-        ActionCodeList alist = currentWorkspaceActions();
+        ActionItem action = actionsRegister()->action(actionCode);
         bool checked = containsAction(currentWorkspaceActions(), actionCode);
 
         m_actions << makeItem(action, checked);
@@ -398,7 +407,7 @@ void NoteInputBarCustomiseModel::updateAddSeparatorAvailability()
     setIsAddSeparatorAvailable(addingAvailable);
 }
 
-AbstractNoteInputBarItem* NoteInputBarCustomiseModel::makeItem(const UiAction& action, bool checked)
+AbstractNoteInputBarItem* NoteInputBarCustomiseModel::makeItem(const mu::actions::ActionItem& action, bool checked)
 {
     if (action.code.empty()) {
         return makeSeparatorItem();
@@ -406,7 +415,7 @@ AbstractNoteInputBarItem* NoteInputBarCustomiseModel::makeItem(const UiAction& a
 
     ActionNoteInputBarItem* item = new ActionNoteInputBarItem(AbstractNoteInputBarItem::ItemType::ACTION);
     item->setId(QString::fromStdString(action.code));
-    item->setTitle(action.title);
+    item->setTitle(qtrc("notation", action.title.c_str()));
     item->setIcon(action.iconCode);
     item->setChecked(checked);
 
@@ -441,8 +450,8 @@ ActionCodeList NoteInputBarCustomiseModel::customizedActions() const
         result.push_back(actionCode);
     }
 
-    UiActionList allNoteInputActions = NotationUiActions::defaultNoteInputActions();
-    for (const UiAction& action: allNoteInputActions) {
+    actions::ActionList allNoteInputActions = NotationActions::defaultNoteInputActions();
+    for (const ActionItem& action: allNoteInputActions) {
         if (actionFromNoteInputModes(action.code)) {
             continue;
         }
@@ -459,7 +468,7 @@ ActionCodeList NoteInputBarCustomiseModel::customizedActions() const
 
 ActionCodeList NoteInputBarCustomiseModel::defaultActions() const
 {
-    UiActionList allNoteInputActions = NotationUiActions::defaultNoteInputActions();
+    ActionList allNoteInputActions = NotationActions::defaultNoteInputActions();
     ActionCodeList currentWorkspaceNoteInputActions = currentWorkspaceActions();
 
     bool noteInputModeActionExists = false;
@@ -508,7 +517,7 @@ ActionCodeList NoteInputBarCustomiseModel::defaultActions() const
 
         result.push_back(actionCode);
 
-        std::optional<size_t> indexInDefaultActions = allNoteInputActions.indexOf(actionCode);
+        std::optional<size_t> indexInDefaultActions = indexOf(allNoteInputActions, actionCode);
         if (indexInDefaultActions) {
             appendRelatedActions(indexInDefaultActions.value() + 1);
         }

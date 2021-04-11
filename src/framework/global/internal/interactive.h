@@ -54,10 +54,8 @@ public:
     RetVal<Val> open(const std::string& uri) const override;
     RetVal<Val> open(const UriQuery& uri) const override;
     RetVal<bool> isOpened(const std::string& uri) const override;
-    RetVal<bool> isOpened(const Uri& uri) const override;
 
     void close(const std::string& uri) override;
-    void close(const Uri& uri) override;
 
     ValCh<Uri> currentUri() const override;
 

@@ -24,11 +24,13 @@
 #include "shortcuts/shortcutstypes.h"
 #include "ui/view/musicalsymbolcodes.h"
 #include "playback/playbacktypes.h"
-#include "playback/internal/playbackuiactions.h"
+#include "playback/internal/playbackactions.h"
 
 using namespace mu::playback;
 using namespace mu::actions;
+using namespace mu::uicomponents;
 using namespace mu::workspace;
+using namespace mu::shortcuts;
 using namespace mu::ui;
 using namespace mu::notation;
 
@@ -62,10 +64,10 @@ QVariant PlaybackToolBarModel::data(const QModelIndex& index, int role) const
     const MenuItem& item = m_items.at(index.row());
 
     switch (role) {
-    case HintRole: return item.description;
+    case HintRole: return QString::fromStdString(item.description);
     case IconRole: return static_cast<int>(item.iconCode);
     case CodeRole: return QString::fromStdString(item.code);
-    case CheckedRole: return item.state.checked;
+    case CheckedRole: return item.checked;
     case IsAdditionalRole: return isAdditionalAction(item.code);
     case IsPlaybackSettingsRole: return item.code == PLAYBACK_SETTINGS_KEY;
     }
@@ -97,9 +99,9 @@ void PlaybackToolBarModel::load()
     beginResetModel();
     m_items.clear();
 
-    UiActionList additionalActions;
+    ActionList additionalActions;
 
-    for (const UiAction& action : currentWorkspaceActions()) {
+    for (const ActionItem& action : currentWorkspaceActions()) {
         if (isAdditionalAction(action.code)) {
             additionalActions.push_back(action);
             continue;
@@ -110,7 +112,7 @@ void PlaybackToolBarModel::load()
 
     m_items << settingsItem();
 
-    for (const UiAction& action : additionalActions) {
+    for (const ActionItem& action : additionalActions) {
         m_items << action;
     }
 
@@ -145,23 +147,23 @@ void PlaybackToolBarModel::setupConnections()
     });
 }
 
-UiActionList PlaybackToolBarModel::currentWorkspaceActions() const
+ActionList PlaybackToolBarModel::currentWorkspaceActions() const
 {
     RetValCh<IWorkspacePtr> workspace = workspaceManager()->currentWorkspace();
     if (!workspace.ret || !workspace.val) {
         LOGE() << workspace.ret.toString();
-        return UiActionList();
+        return ActionList();
     }
 
     AbstractDataPtr abstractData = workspace.val->data(WorkspaceTag::Toolbar, PLAYBACK_TOOLBAR_KEY);
     ToolbarDataPtr toolbar = std::dynamic_pointer_cast<ToolbarData>(abstractData);
     if (!toolbar) {
-        return UiActionList();
+        return ActionList();
     }
 
-    UiActionList actions;
+    ActionList actions;
     for (const ActionCode& actionCode : toolbar->actions) {
-        actions.push_back(uiactionsRegister()->action(actionCode));
+        actions.push_back(actionsRegister()->action(actionCode));
     }
 
     return actions;
@@ -325,7 +327,7 @@ void PlaybackToolBarModel::updateState()
     bool playAllowed = isPlayAllowed();
 
     for (MenuItem& item : m_items) {
-        item.state.checked = playAllowed && playbackController()->isActionEnabled(item.code);
+        item.checked = playAllowed && playbackController()->isActionEnabled(item.code);
     }
 
     if (playAllowed) {
@@ -352,15 +354,15 @@ MenuItem& PlaybackToolBarModel::item(const ActionCode& actionCode)
 
 MenuItem PlaybackToolBarModel::settingsItem() const
 {
-    return UiAction(PLAYBACK_SETTINGS_KEY,
-                    UiCtxAny,
-                    QT_TRANSLATE_NOOP("action", "Playback settings"),
-                    QT_TRANSLATE_NOOP("action", "Open playback settings"),
-                    IconCode::Code::SETTINGS_COG
-                    );
+    return ActionItem(PLAYBACK_SETTINGS_KEY,
+                      ShortcutContext::Any,
+                      QT_TRANSLATE_NOOP("action", "Playback settings"),
+                      QT_TRANSLATE_NOOP("action", "Open playback settings"),
+                      IconCode::Code::SETTINGS_COG
+                      );
 }
 
 bool PlaybackToolBarModel::isAdditionalAction(const actions::ActionCode& actionCode) const
 {
-    return PlaybackUiActions::loopBoundaryActions().contains(actionCode);
+    return containsAction(PlaybackActions::loopBoundaryActions(), actionCode);
 }

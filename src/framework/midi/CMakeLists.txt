@@ -67,12 +67,8 @@ set(MODULE_SRC
     ${CMAKE_CURRENT_LIST_DIR}/internal/dummymidiinport.h
     ${CMAKE_CURRENT_LIST_DIR}/internal/midiportdatasender.cpp
     ${CMAKE_CURRENT_LIST_DIR}/internal/midiportdatasender.h
-    ${CMAKE_CURRENT_LIST_DIR}/view/mididevicemappingsmodel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/view/mididevicemappingsmodel.h
-    ${CMAKE_CURRENT_LIST_DIR}/view/editmidimappingmodel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/view/editmidimappingmodel.h
-    ${CMAKE_CURRENT_LIST_DIR}/view/devtools/midiportdevmodel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/view/devtools/midiportdevmodel.h
+    ${CMAKE_CURRENT_LIST_DIR}/devtools/midiportdevmodel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/devtools/midiportdevmodel.h
     )
 
 set(MODULE_LINK
@@ -84,9 +80,5 @@ include(GetPlatformInfo)
 if (OS_IS_WIN)
     set(MODULE_LINK ${MODULE_LINK} winmm)
 endif(OS_IS_WIN)
-
-set(MODULE_QRC midi.qrc)
-
-set(MODULE_QML_IMPORT ${CMAKE_CURRENT_LIST_DIR}/qml )
 
 include(${PROJECT_SOURCE_DIR}/build/module.cmake)

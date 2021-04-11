@@ -37,7 +37,6 @@ class DockToolBar : public DockView
     Q_PROPERTY(bool floatable READ floatable WRITE setFloatable NOTIFY floatableChanged)
     Q_PROPERTY(bool movable READ movable WRITE setMovable NOTIFY movableChanged)
     Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleEdited)
-    Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged)
 
 public:
     explicit DockToolBar(QQuickItem* parent = nullptr);
@@ -59,8 +58,7 @@ public:
     bool floating() const;
     bool floatable() const;
     bool movable() const;
-    bool visible() const override;
-    QString title() const;
+    bool visible() const;
 
 public slots:
     void setMinimumHeight(int minimumHeight);
@@ -68,8 +66,7 @@ public slots:
     void setAllowedAreas(Qt::ToolBarAreas allowedAreas);
     void setFloatable(bool floatable);
     void setMovable(bool movable);
-    void setVisible(bool visible) override;
-    void setTitle(const QString& title);
+    void setVisible(bool visible);
 
 signals:
     void orientationChanged(int orientation);
@@ -79,8 +76,8 @@ signals:
     void floatingChanged(bool floating);
     void floatableChanged(bool floatable);
     void movableChanged(bool movable);
+
     void visibleEdited(bool visible);
-    void titleChanged(QString title);
 
 protected:
     void onComponentCompleted() override;

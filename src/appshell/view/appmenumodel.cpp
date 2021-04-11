@@ -23,7 +23,7 @@
 #include "log.h"
 
 using namespace mu::appshell;
-using namespace mu::ui;
+using namespace mu::uicomponents;
 using namespace mu::notation;
 using namespace mu::workspace;
 using namespace mu::actions;
@@ -47,15 +47,8 @@ void AppMenuModel::load()
     appendItem(toolsItem());
     appendItem(helpItem());
 
-    listenActionsStateChanges();
     setupConnections();
 
-    emit itemsChanged();
-}
-
-void AppMenuModel::onActionsStateChanges(const actions::ActionCodeList& codes)
-{
-    AbstractMenuModel::onActionsStateChanges(codes);
     emit itemsChanged();
 }
 
@@ -67,8 +60,26 @@ void AppMenuModel::handleAction(const QString& actionCodeStr, int actionIndex)
     actionsDispatcher()->dispatch(actionCode, menuItem.args);
 }
 
+ActionState AppMenuModel::actionState(const ActionCode& actionCode) const
+{
+    for (IMenuControllerPtr controller: menuControllersRegister()->controllers()) {
+        if (controller->contains(actionCode)) {
+            return controller->actionState(actionCode);
+        }
+    }
+
+    return ActionState();
+}
+
 void AppMenuModel::setupConnections()
 {
+    for (IMenuControllerPtr controller: menuControllersRegister()->controllers()) {
+        controller->actionsAvailableChanged().onReceive(this, [this](const std::vector<actions::ActionCode>& actionCodes) {
+            updateItemsState(actionCodes);
+            emit itemsChanged();
+        });
+    }
+
     userScoresService()->recentScoreList().ch.onReceive(this, [this](const MetaList&) {
         MenuItem& recentScoreListItem = findMenu("file-open");
         recentScoreListItem.subitems = recentScores();
@@ -89,7 +100,7 @@ MenuItem AppMenuModel::fileItem() const
     MenuItemList fileItems {
         makeAction("file-new"),
         makeAction("file-open"),
-        makeMenu(qtrc("appshell", "Open &Recent"), recentScoresList, !recentScoresList.empty(), "file-open"),
+        makeMenu(trc("appshell", "Open &Recent"), recentScoresList, !recentScoresList.empty(), "file-open"),
         makeSeparator(),
         makeAction("file-close"),
         makeAction("file-save"),
@@ -109,7 +120,7 @@ MenuItem AppMenuModel::fileItem() const
         makeAction("quit")
     };
 
-    return makeMenu(qtrc("appshell", "&File"), fileItems);
+    return makeMenu(trc("appshell", "&File"), fileItems);
 }
 
 MenuItem AppMenuModel::editItem() const
@@ -133,7 +144,7 @@ MenuItem AppMenuModel::editItem() const
         makeAction("preference-dialog")
     };
 
-    return makeMenu(qtrc("appshell", "&Edit"), editItems);
+    return makeMenu(trc("appshell", "&Edit"), editItems);
 }
 
 MenuItem AppMenuModel::viewItem() const
@@ -147,14 +158,15 @@ MenuItem AppMenuModel::viewItem() const
         makeAction("toggle-timeline"), // need implement
         makeAction("toggle-mixer"), // need implement
         makeAction("synth-control"), // need implement
+        makeAction("toggle-selection-window"), // need implement
         makeAction("toggle-piano"), // need implement
         makeAction("toggle-scorecmp-tool"), // need implement
         makeSeparator(),
         makeAction("zoomin"),
         makeAction("zoomout"),
         makeSeparator(),
-        makeMenu(qtrc("appshell", "&Toolbars"), toolbarsItems()),
-        makeMenu(qtrc("appshell", "W&orkspaces"), workspacesItems(), true, "select-workspace"),
+        makeMenu(trc("appshell", "&Toolbars"), toolbarsItems()),
+        makeMenu(trc("appshell", "W&orkspaces"), workspacesItems(), true, "select-workspace"),
         makeAction("toggle-statusbar"),
         makeSeparator(),
         makeAction("split-h"), // need implement
@@ -169,23 +181,23 @@ MenuItem AppMenuModel::viewItem() const
         makeAction("fullscreen")
     };
 
-    return makeMenu(qtrc("appshell", "&View"), viewItems);
+    return makeMenu(trc("appshell", "&View"), viewItems);
 }
 
 MenuItem AppMenuModel::addItem() const
 {
     MenuItemList addItems {
-        makeMenu(qtrc("appshell", "N&otes"), notesItems()),
-        makeMenu(qtrc("appshell", "&Intervals"), intervalsItems()),
-        makeMenu(qtrc("appshell", "T&uplets"), tupletsItems()),
+        makeMenu(trc("appshell", "N&otes"), notesItems()),
+        makeMenu(trc("appshell", "&Intervals"), intervalsItems()),
+        makeMenu(trc("appshell", "T&uplets"), tupletsItems()),
         makeSeparator(),
-        makeMenu(qtrc("appshell", "&Measures"), measuresItems()),
-        makeMenu(qtrc("appshell", "&Frames"), framesItems()),
-        makeMenu(qtrc("appshell", "&Text"), textItems()),
-        makeMenu(qtrc("appshell", "&Lines"), linesItems()),
+        makeMenu(trc("appshell", "&Measures"), measuresItems()),
+        makeMenu(trc("appshell", "&Frames"), framesItems()),
+        makeMenu(trc("appshell", "&Text"), textItems()),
+        makeMenu(trc("appshell", "&Lines"), linesItems()),
     };
 
-    return makeMenu(qtrc("appshell", "&Add"), addItems);
+    return makeMenu(trc("appshell", "&Add"), addItems);
 }
 
 MenuItem AppMenuModel::formatItem() const
@@ -201,7 +213,7 @@ MenuItem AppMenuModel::formatItem() const
         makeAction("page-settings"), // need implement
         makeSeparator(),
         makeAction("add-remove-breaks"),
-        makeMenu(qtrc("appshell", "&Stretch"), stretchItems),
+        makeMenu(trc("appshell", "&Stretch"), stretchItems),
         makeSeparator(),
         makeAction("reset-text-style-overrides"),
         makeAction("reset-beammode"),
@@ -211,7 +223,7 @@ MenuItem AppMenuModel::formatItem() const
         makeAction("save-style") // need implement
     };
 
-    return makeMenu(qtrc("appshell", "F&ormat"), formatItems);
+    return makeMenu(trc("appshell", "F&ormat"), formatItems);
 }
 
 MenuItem AppMenuModel::toolsItem() const
@@ -236,8 +248,8 @@ MenuItem AppMenuModel::toolsItem() const
         makeAction("explode"),
         makeAction("implode"),
         makeAction("realize-chord-symbols"),
-        makeMenu(qtrc("appshell", "&Voices"), voicesItems),
-        makeMenu(qtrc("appshell", "&Measures"), measuresItems),
+        makeMenu(trc("appshell", "&Voices"), voicesItems),
+        makeMenu(trc("appshell", "&Measures"), measuresItems),
         makeAction("time-delete"),
         makeSeparator(),
         makeAction("slash-fill"),
@@ -253,7 +265,7 @@ MenuItem AppMenuModel::toolsItem() const
         makeAction("del-empty-measures"),
     };
 
-    return makeMenu(qtrc("appshell", "&Tools"), toolsItems);
+    return makeMenu(trc("appshell", "&Tools"), toolsItems);
 }
 
 MenuItem AppMenuModel::helpItem() const
@@ -265,7 +277,7 @@ MenuItem AppMenuModel::helpItem() const
 
     MenuItemList helpItems {
         makeAction("online-handbook"),
-        makeMenu(qtrc("appshell", "&Tours"), toursItems),
+        makeMenu(trc("appshell", "&Tours"), toursItems),
         makeSeparator(),
         makeAction("about"), // need implement
         makeAction("about-qt"),
@@ -283,7 +295,7 @@ MenuItem AppMenuModel::helpItem() const
               << makeSeparator()
               << makeAction("revert-factory"); // need implement
 
-    return makeMenu(qtrc("appshell", "&Help"), helpItems);
+    return makeMenu(trc("appshell", "&Help"), helpItems);
 }
 
 MenuItemList AppMenuModel::recentScores() const
@@ -291,11 +303,11 @@ MenuItemList AppMenuModel::recentScores() const
     MenuItemList items;
     MetaList recentScores = userScoresService()->recentScoreList().val;
 
-    for (const Meta& meta : recentScores) {
-        MenuItem item = uiactionsRegister()->action("file-open");
-        item.title = !meta.title.isEmpty() ? meta.title : meta.fileName.toQString();
+    for (const Meta& meta: recentScores) {
+        MenuItem item = actionsRegister()->action("file-open");
+        item.title = !meta.title.isEmpty() ? meta.title.toStdString() : meta.fileName.toStdString();
         item.args = ActionData::make_arg1<io::path>(meta.filePath);
-        item.state.enabled = true;
+        item.enabled = true;
 
         items << item;
     }
@@ -472,14 +484,14 @@ MenuItemList AppMenuModel::workspacesItems() const
     });
 
     for (const IWorkspacePtr& workspace : workspaces.val) {
-        MenuItem item = uiactionsRegister()->action("select-workspace");
-        item.title = QString::fromStdString(workspace->title());
+        MenuItem item = actionsRegister()->action("select-workspace");
+        item.title = workspace->title();
         item.args = ActionData::make_arg1<std::string>(workspace->name());
 
         bool isCurrentWorkspace = workspace == currentWorkspace;
         item.selectable = true;
         item.selected = isCurrentWorkspace;
-        item.state.enabled = true;
+        item.enabled = true;
 
         items << item;
     }

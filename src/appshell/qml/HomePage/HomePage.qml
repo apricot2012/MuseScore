@@ -102,7 +102,6 @@ DockPage {
         }
 
         Rectangle {
-
             Loader {
                 id: centralLoader
                 anchors.fill: parent

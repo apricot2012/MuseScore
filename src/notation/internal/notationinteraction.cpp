@@ -763,12 +763,9 @@ bool NotationInteraction::drop(const QPointF& pos, Qt::KeyboardModifiers modifie
     startEdit();
     score()->addRefresh(m_dropData.ed.dropElement->canvasBoundingRect());
     switch (m_dropData.ed.dropElement->type()) {
-    case ElementType::TEXTLINE:
-        firstStaffOnly = m_dropData.ed.dropElement->systemFlag();
-    // fall-thru
     case ElementType::VOLTA:
         // voltas drop to first staff by default, or closest staff if Control is held
-        firstStaffOnly = firstStaffOnly || !(m_dropData.ed.modifiers & Qt::ControlModifier);
+        firstStaffOnly = !(m_dropData.ed.modifiers & Qt::ControlModifier);
     // fall-thru
     case ElementType::OTTAVA:
     case ElementType::TRILL:
@@ -777,6 +774,7 @@ bool NotationInteraction::drop(const QPointF& pos, Qt::KeyboardModifiers modifie
     case ElementType::VIBRATO:
     case ElementType::PALM_MUTE:
     case ElementType::HAIRPIN:
+    case ElementType::TEXTLINE:
     {
         Ms::Spanner* spanner = ptr::checked_cast<Ms::Spanner>(m_dropData.ed.dropElement);
         score()->cmdAddSpanner(spanner, pos, firstStaffOnly);

@@ -19,8 +19,11 @@
 
 #include "undoredomodel.h"
 
+#include "uicomponents/uicomponentstypes.h"
+
 using namespace mu::notation;
-using namespace mu::ui;
+using namespace mu::actions;
+using namespace mu::uicomponents;
 
 UndoRedoModel::UndoRedoModel(QObject* parent)
     : QObject(parent)
@@ -30,7 +33,7 @@ UndoRedoModel::UndoRedoModel(QObject* parent)
 QVariant UndoRedoModel::undoItem() const
 {
     MenuItem item = actionsRegister()->action("undo");
-    item.state.enabled = undoStack() ? undoStack()->canUndo() : false;
+    item.enabled = undoStack() ? undoStack()->canUndo() : false;
 
     return item.toMap();
 }
@@ -38,7 +41,7 @@ QVariant UndoRedoModel::undoItem() const
 QVariant UndoRedoModel::redoItem() const
 {
     MenuItem item = actionsRegister()->action("redo");
-    item.state.enabled = undoStack() ? undoStack()->canRedo() : false;
+    item.enabled = undoStack() ? undoStack()->canRedo() : false;
 
     return item.toMap();
 }

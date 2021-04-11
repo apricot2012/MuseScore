@@ -21,6 +21,7 @@
 
 #include "modularity/ioc.h"
 #include "actions/iactionsdispatcher.h"
+#include "actions/iactionsregister.h"
 #include "actions/actionable.h"
 #include "async/asyncable.h"
 #include "context/iglobalcontext.h"
@@ -28,11 +29,13 @@
 #include "iinteractive.h"
 #include "audio/isequencer.h"
 #include "inotationconfiguration.h"
+#include "inotationactionscontroller.h"
 
 namespace mu::notation {
-class NotationActionController : public actions::Actionable, public async::Asyncable
+class NotationActionController : public INotationActionsController, public actions::Actionable, public async::Asyncable
 {
     INJECT(notation, actions::IActionsDispatcher, dispatcher)
+    INJECT(notation, actions::IActionsRegister, actionsRegister)
     INJECT(notation, context::IGlobalContext, globalContext)
     INJECT(notation, framework::IInteractive, interactive)
     INJECT(notation, audio::ISequencer, sequencer)
@@ -41,20 +44,19 @@ class NotationActionController : public actions::Actionable, public async::Async
 public:
     void init();
 
-    bool canReceiveAction(const actions::ActionCode& code) const override;
-
-    async::Notification currentNotationChanged() const;
-
-    INotationNoteInputPtr currentNotationNoteInput() const;
-    async::Notification currentNotationNoteInputChanged() const;
-
-    INotationInteractionPtr currentNotationInteraction() const;
+    bool actionAvailable(const actions::ActionCode& actionCode) const override;
+    async::Channel<actions::ActionCodeList> actionsAvailableChanged() const override;
 
 private:
+    bool canReceiveAction(const actions::ActionCode& actionCode) const override;
+
+    void setupConnections();
 
     INotationPtr currentNotation() const;
+    INotationInteractionPtr currentNotationInteraction() const;
     INotationElementsPtr currentNotationElements() const;
     INotationSelectionPtr currentNotationSelection() const;
+    INotationNoteInputPtr currentNotationNoteInput() const;
     INotationUndoStackPtr currentNotationUndoStack() const;
 
     void toggleNoteInput();
@@ -161,7 +163,7 @@ private:
     bool canRedo() const;
     bool isNotationPage() const;
 
-    async::Notification m_currentNotationNoteInputChanged;
+    async::Channel<actions::ActionCodeList> m_actionsReceiveAvailableChanged;
 };
 }
 

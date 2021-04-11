@@ -313,14 +313,8 @@ void Cursor::add(Element* wrapped)
             break;
         }
 
-        // To be added to a note (and in case of SYMBOL also to a rest)
-        case ElementType::SYMBOL: {
-            Ms::Element* curElement = currentElement();
-            if (curElement->isRest()) {
-                s->setParent(curElement);
-                _score->undoAddElement(s);
-            }
-        } // FALLTHROUGH
+        // To be added to a note
+        case ElementType::SYMBOL:
         case ElementType::FINGERING:
         case ElementType::BEND:
         case ElementType::NOTEHEAD: {

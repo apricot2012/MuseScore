@@ -27,9 +27,9 @@ namespace Ms {
 
 struct Acc {
     AccidentalVal offset;     // semitone offset
-    double centOffset;
+    int centOffset;
     SymId sym;
-    Acc(AccidentalVal o, double o2, SymId s)
+    Acc(AccidentalVal o, int o2, SymId s)
         : offset(o), centOffset(o2), sym(s) {}
 };
 

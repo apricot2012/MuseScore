@@ -34,6 +34,9 @@ Row {
             width: 36
             height: width
 
+            padding: 0
+            spacing: 0
+
             checked: view.currentIndex === model.index
 
             onClicked: {

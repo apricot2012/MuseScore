@@ -1,15 +1,11 @@
 import QtQuick 2.15
-import QtQuick.Layouts 1.15
+import QtQuick.Layouts 1.12
 
 import MuseScore.Ui 1.0
 import MuseScore.UiComponents 1.0
 import MuseScore.Preferences 1.0
 
-import "internal"
-
-PreferencesPage {
-    id: root
-
+Item {
     NoteInputPreferencesModel {
         id: noteInputModel
     }
@@ -45,17 +41,32 @@ PreferencesPage {
             }
         }
 
-        IncrementalPropertyControlWithTitle {
-            title: qsTrc("appshell", "Delay between notes in automatic real time mode:")
+        Row {
+            width: parent.width
+            height: childrenRect.height
 
-            titleWidth: 173
             spacing: 46
 
-            currentValue: noteInputModel.delayBetweenNotesInRealTimeModeMilliseconds
-            measureUnitsSymbol: qsTrc("appshell", "ms")
+            StyledTextLabel {
+                width: 173
 
-            onValueEdited: {
-                noteInputModel.delayBetweenNotesInRealTimeModeMilliseconds = newValue
+                horizontalAlignment: Qt.AlignLeft
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
+
+                text: qsTrc("appshell", "Delay between notes in automatic real time mode:")
+            }
+
+            IncrementalPropertyControl {
+                width: 102
+
+                currentValue: noteInputModel.delayBetweenNotesInRealTimeModeMilliseconds
+                measureUnitsSymbol: qsTrc("appshell", "ms")
+                step: 1
+
+                onValueEdited: {
+                    noteInputModel.delayBetweenNotesInRealTimeModeMilliseconds = newValue
+                }
             }
         }
 
@@ -72,16 +83,29 @@ PreferencesPage {
             }
         }
 
-        IncrementalPropertyControlWithTitle {
-            title: qsTrc("appshell", "Default duration:")
-
+        Row {
+            enabled: noteInputModel.playNotesWhenEditing
             spacing: 126
 
-            currentValue: noteInputModel.notePlayDurationMilliseconds
-            measureUnitsSymbol: qsTrc("appshell", "ms")
+            StyledTextLabel {
+                anchors.verticalCenter: parent.verticalCenter
 
-            onValueEdited: {
-                noteInputModel.notePlayDurationMilliseconds = newValue
+                width: 93
+                horizontalAlignment: Qt.AlignLeft
+
+                text: qsTrc("appshell", "Default duration:")
+            }
+
+            IncrementalPropertyControl {
+                width: 102
+
+                currentValue: noteInputModel.notePlayDurationMilliseconds
+                measureUnitsSymbol: qsTrc("appshell", "ms")
+                step: 1
+
+                onValueEdited: {
+                    noteInputModel.notePlayDurationMilliseconds = newValue
+                }
             }
         }
 

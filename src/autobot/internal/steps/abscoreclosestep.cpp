@@ -25,12 +25,7 @@ AbScoreCloseStep::AbScoreCloseStep(Delay delay)
 {
 }
 
-std::string AbScoreCloseStep::name() const
-{
-    return "CloseScore";
-}
-
-void AbScoreCloseStep::doRun(IAbContextPtr ctx)
+void AbScoreCloseStep::doRun(AbContext ctx)
 {
     auto notation = context()->currentNotation();
 
@@ -40,5 +35,6 @@ void AbScoreCloseStep::doRun(IAbContextPtr ctx)
         notation->setOpened(false);
     }
 
-    doFinish(ctx, make_ret(Ret::Code::Ok));
+    ctx.ret = make_ret(Ret::Code::Ok);
+    doFinish(ctx);
 }

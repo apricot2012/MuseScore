@@ -5804,6 +5804,7 @@ void MusicXMLParserNotations::ornaments()
         } else if (_e.name() == "inverted-mordent"
                    || _e.name() == "mordent") {
             mordentNormalOrInverted();
+            _e.readNext();
         } else {
             skipLogCurrElem();
         }

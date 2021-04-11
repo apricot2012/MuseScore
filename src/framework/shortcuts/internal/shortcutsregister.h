@@ -22,15 +22,13 @@
 #include "../ishortcutsregister.h"
 #include "modularity/ioc.h"
 #include "ishortcutsconfiguration.h"
-#include "async/asyncable.h"
 
 namespace mu::framework {
 class XmlReader;
-class XmlWriter;
 }
 
 namespace mu::shortcuts {
-class ShortcutsRegister : public IShortcutsRegister, public async::Asyncable
+class ShortcutsRegister : public IShortcutsRegister
 {
     INJECT(shortcuts, IShortcutsConfiguration, configuration)
 
@@ -40,28 +38,16 @@ public:
     void load();
 
     const ShortcutList& shortcuts() const override;
-    Ret setShortcuts(const ShortcutList& shortcuts) override;
-    async::Notification shortcutsChanged() const override;
-
-    const Shortcut& shortcut(const std::string& actionCode) const override;
-    const Shortcut& defaultShortcut(const std::string& actionCode) const override;
+    Shortcut shortcut(const std::string& actionCode) const override;
     ShortcutList shortcutsForSequence(const std::string& sequence) const override;
 
-    Ret saveToFile(const io::path& filePath) const override;
-
 private:
-
-    bool readFromFile(ShortcutList& shortcuts, const io::path& path) const;
+    bool loadFromFile(ShortcutList& shortcuts, const io::path& path) const;
     Shortcut readShortcut(framework::XmlReader& reader) const;
-
-    bool writeToFile(const ShortcutList& shortcuts, const io::path& path) const;
-    void writeShortcut(framework::XmlWriter& writer, const Shortcut& shortcut) const;
 
     void expandStandardKeys(ShortcutList& shortcuts) const;
 
     ShortcutList m_shortcuts;
-    ShortcutList m_defaultShortcuts;
-    async::Notification m_shortcutsChanged;
 };
 }
 

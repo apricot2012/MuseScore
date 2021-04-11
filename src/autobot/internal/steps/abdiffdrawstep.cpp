@@ -26,18 +26,11 @@
 
 using namespace mu::autobot;
 
-std::string AbDiffDrawStep::name() const
+void AbDiffDrawStep::doRun(AbContext ctx)
 {
-    return "DiffDraw";
-}
-
-void AbDiffDrawStep::doRun(IAbContextPtr ctx)
-{
-    draw::Diff diff = ctx->findVal<draw::Diff>(IAbContext::Key::DiffDrawData);
+    draw::Diff diff = ctx.val<draw::Diff>(AbContext::Key::DiffDrawData);
     AbPaintProvider::instance()->setDiff(diff);
     AbPaintProvider::instance()->setIsDiffDrawEnabled(true);
 
     dispatcher()->dispatch("dev-notationview-redraw");
-
-    doFinish(ctx, make_ret(Ret::Code::Ok));
 }

@@ -10,25 +10,10 @@ Rectangle {
 
     property alias orientation: gridView.orientation
 
-    property alias keynav: keynavSub
-
     QtObject {
         id: privatesProperties
 
         property bool isHorizontal: orientation === Qt.Horizontal
-    }
-
-    KeyNavigationSubSection {
-        id: keynavSub
-        name: "NotationToolBar"
-    }
-
-    NoteInputBarModel {
-        id: noteInputModel
-    }
-
-    Component.onCompleted: {
-        noteInputModel.load()
     }
 
     GridViewSectional {
@@ -49,7 +34,7 @@ Rectangle {
 
         itemDelegate: FlatButton {
             property var item: Boolean(itemModel) ? itemModel : null
-            property var hasSubitems: Boolean(item) && item.subitemsRole.length !== 0
+            property var hasSubitems: item.subitemsRole.length !== 0
 
             normalStateColor: Boolean(item) && item.checkedRole ? ui.theme.accentColor : "transparent"
 
@@ -58,17 +43,14 @@ Rectangle {
 
             iconFont: ui.theme.toolbarIconsFont
 
-            keynav.subsection: keynavSub
-            keynav.order: Boolean(item) ? item.orderRole : 0
-
             pressAndHoldInterval: 200
 
             width: gridView.cellWidth
             height: gridView.cellWidth
 
             onClicked: {
-                if (menuLoader.isMenuOpened() || (hasSubitems && !item.showSubitemsByPressAndHoldRole)) {
-                    menuLoader.toggleOpened(item.subitemsRole)
+                if (menu.isOpened || (hasSubitems && !item.showSubitemsByPressAndHoldRole)) {
+                    menu.toggleOpened()
                     return
                 }
 
@@ -76,49 +58,22 @@ Rectangle {
             }
 
             onPressAndHold: {
-                if (menuLoader.isMenuOpened() || !hasSubitems) {
+                if (menu.isOpened || !hasSubitems) {
                     return
                 }
 
-                menuLoader.toggleOpened(item.subitemsRole)
+                menu.toggleOpened()
             }
 
-            Loader {
-                id: menuLoader
-                anchors.fill: parent
+            StyledMenu {
+                id: menu
 
-                property var menu: menuLoader.item
+                model: item.subitemsRole
 
-                function isMenuOpened() {
-                    return menuLoader.menu && menuLoader.menu.isOpened
+                onHandleAction: {
+                    Qt.callLater(noteInputModel.handleAction, actionCode, actionIndex)
+                    menu.close()
                 }
-
-                function toggleOpened(items) {
-                    if (!menuLoader.sourceComponent) {
-                        menuLoader.sourceComponent = itemMenuComp
-                    }
-
-                    if (menuLoader.menu.isOpened) {
-                        menuLoader.menu.close()
-                        return
-                    }
-
-                    menuLoader.menu.model = items
-                    menuLoader.menu.open()
-                }
-            }
-        }
-    }
-
-    Component {
-        id: itemMenuComp
-
-        StyledMenu {
-            id: itemMenu
-
-            onHandleAction: {
-                Qt.callLater(noteInputModel.handleAction, actionCode, actionIndex)
-                itemMenu.close()
             }
         }
     }
@@ -130,12 +85,18 @@ Rectangle {
 
         icon: IconCode.CONFIGURE
         normalStateColor: "transparent"
-        keynav.subsection: keynavSub
-        keynav.order: 100
 
         onClicked: {
             api.launcher.open("musescore://notation/noteinputbar/customise")
         }
+    }
+
+    NoteInputBarModel {
+        id: noteInputModel
+    }
+
+    Component.onCompleted: {
+        noteInputModel.load()
     }
 
     states: [

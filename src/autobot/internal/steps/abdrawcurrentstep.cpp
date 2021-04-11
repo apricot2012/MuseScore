@@ -32,18 +32,13 @@ AbDrawCurrentStep::AbDrawCurrentStep(bool isDoSave)
 {
 }
 
-std::string AbDrawCurrentStep::name() const
-{
-    return "DrawCurrent";
-}
-
-void AbDrawCurrentStep::doRun(IAbContextPtr ctx)
+void AbDrawCurrentStep::doRun(AbContext ctx)
 {
     const DrawData& buf = AbPaintProvider::instance()->notationViewDrawData();
-    ctx->setStepVal(IAbContext::Key::CurDrawData, std::make_shared<DrawData>(buf));
+    ctx.setVal<DrawDataPtr>(AbContext::Key::CurDrawData, std::make_shared<DrawData>(buf));
 
     if (!m_isDoSave) {
-        doFinish(ctx, make_ret(Ret::Code::Ok));
+        doFinish(ctx);
         return;
     }
 
@@ -52,23 +47,23 @@ void AbDrawCurrentStep::doRun(IAbContextPtr ctx)
         Ret ret = fileSystem()->makePath(drawDataPath);
         if (!ret) {
             LOGE() << "failed make path: " << drawDataPath;
-            doFinish(ctx, ret);
+            doFinish(ctx);
             return;
         }
     }
 
     QByteArray data = draw::DrawBufferJson::toJson(buf);
 
-    io::path scorePath = ctx->globalVal<io::path>(IAbContext::Key::FilePath);
-    io::path filePath = configuration()->fileDrawDataPath(scorePath);
+    io::path scorePath = ctx.val<io::path>(AbContext::Key::ScoreFile);
+    io::path filePath = configuration()->scoreDrawData(scorePath);
     QFile file(filePath.toQString());
     if (!file.open(QIODevice::WriteOnly)) {
         LOGE() << "failed open file to write draw data, path: " << filePath;
-        doFinish(ctx, make_ret(Ret::Code::UnknownError)); //! TODO add specific error code
+        doFinish(ctx);
         return;
     }
 
     file.write(data);
 
-    doFinish(ctx, make_ret(Ret::Code::Ok));
+    doFinish(ctx);
 }

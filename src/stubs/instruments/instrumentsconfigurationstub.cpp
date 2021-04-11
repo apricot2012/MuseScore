@@ -20,40 +20,7 @@
 
 using namespace mu::instruments;
 
-mu::io::paths InstrumentsConfigurationStub::instrumentListPaths() const
+mu::io::paths InstrumentsConfigurationStub::instrumentPaths() const
 {
     return {};
-}
-
-mu::async::Notification InstrumentsConfigurationStub::instrumentListPathsChanged() const
-{
-    return mu::async::Notification();
-}
-
-mu::io::paths InstrumentsConfigurationStub::userInstrumentListPaths() const
-{
-    return {};
-}
-
-void InstrumentsConfigurationStub::setUserInstrumentListPaths(const io::paths& /*paths*/)
-{
-}
-
-mu::io::paths InstrumentsConfigurationStub::scoreOrderListPaths() const
-{
-    return {};
-}
-
-mu::async::Notification InstrumentsConfigurationStub::scoreOrderListPathsChanged() const
-{
-    return mu::async::Notification();
-}
-
-mu::io::paths InstrumentsConfigurationStub::userScoreOrderListPaths() const
-{
-    return {};
-}
-
-void InstrumentsConfigurationStub::setUserScoreOrderListPaths(const io::paths& /*paths*/)
-{
 }

@@ -28,7 +28,6 @@ public:
     void init();
 
     std::string importOvertuneCharset() const override;
-    void setImportOvertuneCharset(const std::string& charset) override;
 };
 }
 

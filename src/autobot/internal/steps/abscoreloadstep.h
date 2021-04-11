@@ -31,10 +31,8 @@ class AbScoreLoadStep : public AbBaseStep
 public:
     AbScoreLoadStep() = default;
 
-    std::string name() const override;
-
 protected:
-    void doRun(IAbContextPtr ctx) override;
+    void doRun(AbContext ctx) override;
 };
 }
 

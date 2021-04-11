@@ -31,21 +31,16 @@ AutobotModel::AutobotModel(QObject* parent)
     status.ch.onReceive(this, [this](IAutobot::Status) {
         emit statusChanged();
     });
-
-    auto tc = autobot()->currentTestCase();
-    tc.ch.onReceive(this, [this](ITestCasePtr) {
-        emit currentTestCaseChanged();
-    });
 }
 
-void AutobotModel::runAllFiles()
+void AutobotModel::runAll(const QString& testCaseName)
 {
-    autobot()->runAllFiles();
+    autobot()->runAll(testCaseName.toStdString());
 }
 
-void AutobotModel::runFile(int fileIndex)
+void AutobotModel::runFile(const QString& testCaseName, int fileIndex)
 {
-    autobot()->runFile(fileIndex);
+    autobot()->runFile(testCaseName.toStdString(), fileIndex);
 }
 
 void AutobotModel::stop()
@@ -70,16 +65,6 @@ QVariantList AutobotModel::testCases() const
     }
 
     return list;
-}
-
-void AutobotModel::setCurrentTestCase(const QString& testCaseName)
-{
-    autobot()->setCurrentTestCase(testCaseName.toStdString());
-}
-
-QString AutobotModel::currentTestCase() const
-{
-    return QString::fromStdString(autobot()->currentTestCase().val->name());
 }
 
 AbFilesModel* AutobotModel::files() const

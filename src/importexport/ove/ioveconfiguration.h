@@ -31,7 +31,6 @@ public:
     virtual ~IOveConfiguration() = default;
 
     virtual std::string importOvertuneCharset() const = 0;
-    virtual void setImportOvertuneCharset(const std::string& charset) = 0;
 };
 }
 

@@ -23,7 +23,8 @@
 #include "notation/imasternotation.h"
 #include "async/notification.h"
 
-namespace mu::context {
+namespace mu {
+namespace context {
 class IGlobalContext : MODULE_EXPORT_INTERFACE
 {
     INTERFACE_ID(mu::context::IGlobalContext)
@@ -44,6 +45,7 @@ public:
     virtual notation::INotationPtr currentNotation() const = 0;
     virtual async::Notification currentNotationChanged() const = 0;
 };
+}
 }
 
 #endif // MU_CONTEXT_IGLOBALCONTEXT_H

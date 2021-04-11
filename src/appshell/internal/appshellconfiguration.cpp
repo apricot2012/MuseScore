@@ -61,7 +61,6 @@ void AppShellConfiguration::init()
     });
 
     settings()->setDefaultValue(NOTATION_STATUSBAR_VISIBLE_KEY, Val(true));
-    settings()->setCanBeMannualyEdited(NOTATION_STATUSBAR_VISIBLE_KEY, true);
     settings()->valueChanged(NOTATION_STATUSBAR_VISIBLE_KEY).onReceive(nullptr, [this](const Val&) {
         m_notationStatusBarVisibleChanged.send(isNotationStatusBarVisible().val);
     });
@@ -226,21 +225,6 @@ bool AppShellConfiguration::needShowTours() const
 void AppShellConfiguration::setNeedShowTours(bool show)
 {
     settings()->setValue(TOURS_VISIBLE_KEY, Val(show));
-}
-
-void AppShellConfiguration::startEditSettings()
-{
-    settings()->beginTransaction();
-}
-
-void AppShellConfiguration::applySettings()
-{
-    settings()->commitTransaction();
-}
-
-void AppShellConfiguration::rollbackSettings()
-{
-    settings()->rollbackTransaction();
 }
 
 void AppShellConfiguration::revertToFactorySettings(bool keepDefaultSettings) const

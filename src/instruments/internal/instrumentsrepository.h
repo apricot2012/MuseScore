@@ -26,6 +26,7 @@
 #include "retval.h"
 #include "async/channel.h"
 #include "async/asyncable.h"
+#include "framework/system/ifilesystem.h"
 #include "extensions/iextensionsservice.h"
 
 #include "instrumentstypes.h"
@@ -37,6 +38,7 @@ namespace mu::instruments {
 class InstrumentsRepository : public IInstrumentsRepository, public async::Asyncable
 {
     INJECT(instruments, IInstrumentsConfiguration, configuration)
+    INJECT(instruments, system::IFileSystem, fileSystem)
     INJECT(instruments, IInstrumentsReader, reader)
     INJECT(instruments, extensions::IExtensionsService, extensionsService)
 

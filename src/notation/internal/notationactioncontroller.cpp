@@ -23,9 +23,11 @@
 #include "log.h"
 #include "notationtypes.h"
 
+#include "notationactions.h"
+
 using namespace mu::notation;
 using namespace mu::actions;
-using namespace mu::context;
+using namespace mu::shortcuts;
 
 static constexpr int INVALID_BOX_INDEX = -1;
 static constexpr qreal STRETCH_STEP = 0.1;
@@ -257,39 +259,84 @@ void NotationActionController::init()
         dispatcher()->reg(this, "voice-" + std::to_string(i + 1), [this, i]() { changeVoice(i); });
     }
 
-    // listen on state changes
-    globalContext()->currentNotationChanged().onNotify(this, [this]() {
-        auto notation = globalContext()->currentNotation();
-        if (notation) {
-            notation->interaction()->noteInput()->stateChanged().onNotify(this, [this]() {
-                m_currentNotationNoteInputChanged.notify();
-            });
-        }
-        m_currentNotationNoteInputChanged.notify();
-    });
+    setupConnections();
 }
 
-bool NotationActionController::canReceiveAction(const actions::ActionCode& code) const
+bool NotationActionController::actionAvailable(const ActionCode& actionCode) const
 {
-    //! NOTE If the notation is not loaded, we cannot process anything.
+    if (!canReceiveAction(actionCode)) {
+        return false;
+    }
+
+    ActionItem action = actionsRegister()->action(actionCode);
+    if (!action.isValid()) {
+        return false;
+    }
+
+    switch (action.shortcutContext) {
+    case ShortcutContext::NotationHasSelection:
+        return hasSelection();
+    case ShortcutContext::NotationUndoRedo:
+        if (action.code == UNDO_ACTION_CODE) {
+            return canUndo();
+        } else if (action.code == REDO_ACTION_CODE) {
+            return canRedo();
+        }
+        return false;
+    case ShortcutContext::NotationActive:
+        return isNotationPage() && (currentNotation() != nullptr);
+    default:
+        break;
+    }
+
+    return true;
+}
+
+mu::async::Channel<ActionCodeList> NotationActionController::actionsAvailableChanged() const
+{
+    return m_actionsReceiveAvailableChanged;
+}
+
+bool NotationActionController::canReceiveAction(const actions::ActionCode& actionCode) const
+{
     if (!currentNotation()) {
         return false;
     }
 
-    //! NOTE At the moment, if we are in the text editing mode, we can only process the escape
     if (isTextEditting()) {
-        return code == ESCAPE_ACTION_CODE;
-    }
-
-    if (code == UNDO_ACTION_CODE) {
-        return canUndo();
-    }
-
-    if (code == REDO_ACTION_CODE) {
-        return canRedo();
+        return actionCode == ESCAPE_ACTION_CODE;
     }
 
     return true;
+}
+
+void NotationActionController::setupConnections()
+{
+    globalContext()->currentMasterNotationChanged().onNotify(this, [this]() {
+        ActionCodeList actionCodes = NotationActions::actionCodes(ShortcutContext::NotationActive);
+        m_actionsReceiveAvailableChanged.send(actionCodes);
+    });
+
+    interactive()->currentUri().ch.onReceive(this, [this](const Uri&) {
+        ActionCodeList actionCodes = NotationActions::actionCodes(ShortcutContext::NotationActive);
+        m_actionsReceiveAvailableChanged.send(actionCodes);
+    });
+
+    globalContext()->currentNotationChanged().onNotify(this, [this]() {
+        if (!currentNotation()) {
+            return;
+        }
+
+        currentNotationInteraction()->selectionChanged().onNotify(this, [this]() {
+            ActionCodeList actionCodes = NotationActions::actionCodes(ShortcutContext::NotationHasSelection);
+            m_actionsReceiveAvailableChanged.send(actionCodes);
+        });
+
+        currentNotation()->undoStack()->stackChanged().onNotify(this, [this]() {
+            ActionCodeList actionCodes = NotationActions::actionCodes(shortcuts::ShortcutContext::NotationUndoRedo);
+            m_actionsReceiveAvailableChanged.send(actionCodes);
+        });
+    });
 }
 
 INotationPtr NotationActionController::currentNotation() const
@@ -312,11 +359,6 @@ INotationElementsPtr NotationActionController::currentNotationElements() const
     return currentNotation() ? currentNotation()->elements() : nullptr;
 }
 
-mu::async::Notification NotationActionController::currentNotationChanged() const
-{
-    return globalContext()->currentMasterNotationChanged();
-}
-
 INotationNoteInputPtr NotationActionController::currentNotationNoteInput() const
 {
     auto interaction = currentNotationInteraction();
@@ -325,11 +367,6 @@ INotationNoteInputPtr NotationActionController::currentNotationNoteInput() const
     }
 
     return interaction->noteInput();
-}
-
-mu::async::Notification NotationActionController::currentNotationNoteInputChanged() const
-{
-    return m_currentNotationNoteInputChanged;
 }
 
 INotationUndoStackPtr NotationActionController::currentNotationUndoStack() const

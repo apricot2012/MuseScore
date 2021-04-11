@@ -10,15 +10,24 @@ Rectangle {
 
     signal newColorSelected(var newColor)
 
-    height: 30
+    height: 26
     width: parent.width
 
     opacity: enabled ? 1 : ui.theme.itemOpacityDisabled
 
-    radius: 3
+    radius: 2
     color: "#000000"
 
-    border.width: 1
+    Rectangle {
+        id: backgroundRect
+
+        anchors.fill: parent
+        anchors.margins: -2
+
+        radius: 2
+        color: "transparent"
+        border.width: 1
+    }
 
     StyledIconLabel {
         anchors.fill: parent
@@ -29,7 +38,7 @@ Rectangle {
     }
 
     MouseArea {
-        id: clickableArea
+        id: cliickableArea
 
         anchors.fill: parent
 
@@ -54,23 +63,23 @@ Rectangle {
     states: [
         State {
             name: "NORMAL"
-            when: !clickableArea.containsMouse && !colorDialog.visible
+            when: !cliickableArea.containsMouse && !colorDialog.visible
 
-            PropertyChanges { target: root; border.color: ui.theme.buttonColor }
+            PropertyChanges { target: backgroundRect; border.color: ui.theme.buttonColor }
         },
 
         State {
             name: "HOVERED"
-            when: clickableArea.containsMouse && !clickableArea.pressed && !colorDialog.visible
+            when: cliickableArea.containsMouse && !cliickableArea.pressed && !colorDialog.visible
 
-            PropertyChanges { target: root; border.color: ui.theme.accentColor }
+            PropertyChanges { target: backgroundRect; border.color: ui.theme.accentColor }
         },
 
         State {
             name: "PRESSED"
-            when: clickableArea.pressed || colorDialog.visible
+            when: cliickableArea.pressed || colorDialog.visible
 
-            PropertyChanges { target: root; border.color: ui.theme.fontPrimaryColor }
+            PropertyChanges { target: backgroundRect; border.color: ui.theme.fontPrimaryColor }
         }
     ]
 }

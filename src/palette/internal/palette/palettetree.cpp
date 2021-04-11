@@ -313,9 +313,10 @@ bool PaletteCell::read(XmlReader& e)
 
                 if (element->type() == ElementType::ICON) {
                     Icon* icon = static_cast<Icon*>(element.get());
-                    const mu::ui::UiAction& action = adapter()->getAction(icon->actionCode());
-                    if (action.isValid()) {
-                        icon->setAction(icon->actionCode(), static_cast<char16_t>(action.iconCode));
+                    ActionItem actionItem = adapter()->getAction(icon->actionCode());
+
+                    if (actionItem.isValid()) {
+                        icon->setAction(icon->actionCode(), static_cast<char16_t>(actionItem.iconCode));
                     } else {
                         add = false;
                     }
@@ -358,9 +359,9 @@ PaletteCellPtr PaletteCell::readElementMimeData(const QByteArray& data)
 
     if (element->isIcon()) {
         Icon* icon = toIcon(element.get());
-        const mu::ui::UiAction& action = adapter()->getAction(icon->actionCode());
-        if (action.isValid()) {
-            icon->setAction(icon->actionCode(), static_cast<char16_t>(action.iconCode));
+        ActionItem actionItem = adapter()->getAction(icon->actionCode());
+        if (actionItem.isValid()) {
+            icon->setAction(icon->actionCode(), static_cast<char16_t>(actionItem.iconCode));
         }
     }
 

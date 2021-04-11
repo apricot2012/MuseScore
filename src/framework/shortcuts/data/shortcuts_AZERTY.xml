@@ -782,6 +782,10 @@
     <key>inspector</key>
     <seq>F8</seq>
     </SC>
+  <SC>
+    <key>toggle-selection-window</key>
+    <seq>F6</seq>
+    </SC>
 <!--
   <SC>
     <key>omr</key>
@@ -1024,7 +1028,7 @@
     </SC>
   <SC>
     <key>add-parentheses</key>
-    <seq>)</seq>
+    <seq>(</seq>
     </SC>
   <SC>
     <key>toggle-mmrest</key>

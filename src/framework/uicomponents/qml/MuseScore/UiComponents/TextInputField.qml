@@ -16,9 +16,6 @@ Rectangle {
     property alias hintIcon: hintIcon.iconCode
     property bool clearTextButtonVisible: false
 
-    property bool hasText: valueInput.text.length > 0
-    property alias readOnly: valueInput.readOnly
-
     signal currentTextEdited(var newTextValue)
     signal textCleared()
 

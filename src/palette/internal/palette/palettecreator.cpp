@@ -105,9 +105,9 @@ void populateIconPalette(Palette* p, const IconAction* a)
     while (a->subtype != IconType::NONE) {
         auto ik = makeElement<Icon>(Ms::gscore);
         ik->setIconType(a->subtype);
-        const mu::ui::UiAction& action = adapter->getAction(codeFromQString(a->action));
+        ActionItem action = adapter->getAction(codeFromQString(a->action));
         ik->setAction(a->action, static_cast<char16_t>(action.iconCode));
-        p->append(ik, action.title);
+        p->append(ik, QString::fromStdString(action.title));
         ++a;
     }
 }
@@ -422,9 +422,9 @@ static void populateIconPalettePanel(PalettePanel* p, const IconAction* a)
     while (a->subtype != IconType::NONE) {
         auto ik = makeElement<Icon>(gscore);
         ik->setIconType(a->subtype);
-        const mu::ui::UiAction& action = adapter->getAction(codeFromQString(a->action));
+        ActionItem action = adapter->getAction(codeFromQString(a->action));
         ik->setAction(a->action, static_cast<char16_t>(action.iconCode));
-        p->append(ik, action.title);
+        p->append(ik, QString::fromStdString(action.title));
         ++a;
     }
 }
@@ -568,21 +568,21 @@ PalettePanel* PaletteCreator::newAccidentalsPalettePanel(bool defaultPalettePane
 
     auto ik = makeElement<Icon>(gscore);
     ik->setIconType(IconType::BRACKETS);
-    const mu::ui::UiAction& bracketsAction = adapter()->getAction("add-brackets");
-    ik->setAction(bracketsAction.code, static_cast<char16_t>(bracketsAction.iconCode));
-    sp->append(ik, bracketsAction.title);
+    ActionItem action = adapter()->getAction("add-brackets");
+    ik->setAction(action.code, static_cast<char16_t>(action.iconCode));
+    sp->append(ik, QString::fromStdString(action.title));
 
     ik = makeElement<Icon>(gscore);
     ik->setIconType(IconType::PARENTHESES);
-    const mu::ui::UiAction& parenthesesAction = adapter()->getAction("add-parentheses");
-    ik->setAction(parenthesesAction.code, static_cast<char16_t>(parenthesesAction.iconCode));
-    sp->append(ik, parenthesesAction.title);
+    action = adapter()->getAction("add-parentheses");
+    ik->setAction(action.code, static_cast<char16_t>(action.iconCode));
+    sp->append(ik, QString::fromStdString(action.title));
 
     ik = makeElement<Icon>(gscore);
     ik->setIconType(IconType::BRACES);
-    const mu::ui::UiAction& bracesAction = adapter()->getAction("add-braces");
-    ik->setAction(bracesAction.code, static_cast<char16_t>(bracesAction.iconCode));
-    sp->append(ik, bracesAction.title);
+    action = adapter()->getAction("add-braces");
+    ik->setAction(action.code, static_cast<char16_t>(action.iconCode));
+    sp->append(ik, QString::fromStdString(action.title));
 
     return sp;
 }
@@ -874,9 +874,9 @@ PalettePanel* PaletteCreator::newNoteHeadsPalettePanel()
 
     auto ik = makeElement<Icon>(gscore);
     ik->setIconType(IconType::PARENTHESES);
-    const mu::ui::UiAction& action = adapter()->getAction("add-parentheses");
+    ActionItem action = adapter()->getAction("add-parentheses");
     ik->setAction("add-parentheses", static_cast<char16_t>(action.iconCode));
-    sp->append(ik, action.title);
+    sp->append(ik, QString::fromStdString(action.title));
 
     return sp;
 }

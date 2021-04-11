@@ -1679,11 +1679,7 @@ Element* Measure::drop(EditData& data)
                         ns = ts;
                     }
                 }
-                if (ns == s) {
-                    qreal y1 = s->staffYpage(staffIdx);
-                    qreal y2 = s->page()->height() - s->page()->bm();
-                    gap = y2 - y1 - score()->staff(staffIdx)->height();
-                } else if (ns && ns->page() == s->page()) {
+                if (ns && ns->page() == s->page()) {
                     qreal y1 = s->staffYpage(staffIdx);
                     qreal y2 = ns->staffYpage(0);
                     gap = y2 - y1 - score()->staff(staffIdx)->height();

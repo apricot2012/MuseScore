@@ -68,10 +68,7 @@ public:
         NotationLast    = 1299,
 
         ConverterFirst  = 1300,
-        ConverterLast   = 1399,
-
-        VstFirst        = 1400,
-        VstLast         = 1499
+        ConverterLast   = 1399
     };
 
     Ret() = default;

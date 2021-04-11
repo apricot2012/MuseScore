@@ -18,7 +18,7 @@ QmlDialog {
     property string currentPageId: ""
 
     property QtObject privatesProperties: QtObject {
-        property var pagesObjects: (new Map())
+        property var pagesComponents: (new Map())
         property bool inited: false
     }
 
@@ -32,30 +32,20 @@ QmlDialog {
         Component.onCompleted: {
             preferencesModel.load(root.currentPageId)
 
-            initPagesObjects()
+            createPagesComponents()
 
             root.privatesProperties.inited = true
         }
 
-        function initPagesObjects() {
+        function createPagesComponents() {
             var pages = preferencesModel.availablePages()
             for (var i in pages) {
                 var pageInfo = pages[i]
 
                 var pagePath = Boolean(pageInfo.path) ? pageInfo.path : "Preferences/StubPreferencesPage.qml"
-                var pageComponent = Qt.createComponent("../" + pagePath)
+                var pageComponent = Qt.createComponent("../" + pagePath);
 
-                var obj = pageComponent.createObject(stack)
-
-                if (!Boolean(obj)) {
-                    continue
-                }
-
-                obj.hideRequested.connect(function() {
-                    root.hide()
-                })
-
-                root.privatesProperties.pagesObjects[pageInfo.id] = obj
+                root.privatesProperties.pagesComponents[pageInfo.id] = pageComponent
             }
         }
 
@@ -87,16 +77,24 @@ QmlDialog {
 
                 SeparatorLine { orientation: Qt.Vertical }
 
-                StackLayout {
-                    id: stack
+                Loader {
+                    id: loader
 
                     Layout.fillHeight: true
                     Layout.fillWidth: true
                     Layout.margins: 30
 
-                    currentIndex: {
-                        var keys = Object.keys(root.privatesProperties.pagesObjects)
-                        return keys.indexOf(preferencesModel.currentPageId)
+                    sourceComponent: Boolean(root.privatesProperties.inited) ?
+                                         root.privatesProperties.pagesComponents[preferencesModel.currentPageId] : null
+
+                    onLoaded: {
+                        if (!Boolean(loader.item.hideRequested)) {
+                            return
+                        }
+
+                        loader.item.hideRequested.connect(function() {
+                            root.hide()
+                        })
                     }
                 }
             }
@@ -114,23 +112,11 @@ QmlDialog {
                 }
 
                 onRejectRequested: {
-                    preferencesModel.cancel()
                     root.reject()
                 }
 
                 onApplyRequested: {
-                    preferencesModel.apply()
-
-                    var ok = true
-                    var pages = preferencesModel.availablePages()
-
-                    for (var i in pages) {
-                        var page = pages[i]
-                        var obj = root.privatesProperties.pagesObjects[page.id]
-                        ok &= obj.apply()
-                    }
-
-                    if (ok) {
+                    if (preferencesModel.apply()) {
                         root.hide()
                     }
                 }

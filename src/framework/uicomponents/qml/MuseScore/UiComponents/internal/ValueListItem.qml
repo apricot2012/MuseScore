@@ -11,9 +11,6 @@ ListItemBlank {
     property var item: null
     property string keyRoleName: "key"
     property string valueRoleName: "value"
-    property string valueTypeRole: "valueType"
-    property string valueEnabledRoleName: "enabled"
-    property string iconRoleName: "icon"
 
     property bool readOnly: false
 
@@ -34,8 +31,8 @@ ListItemBlank {
             switch (type) {
             case "Undefined": return textComp
             case "Bool": return boolComp
-            case "Int": return intComp
-            case "Double": return doubleComp
+            case "Int": return numberComp
+            case "Double": return numberComp
             case "String": return textComp
             case "Color": return colorComp
             }
@@ -44,7 +41,7 @@ ListItemBlank {
         }
 
         function isNumberComponent() {
-            return root.item[valueTypeRole] === "Int" || root.item[valueTypeRole] === "Double"
+            return item.valueType === "Int" || type.valueType === "Double"
         }
     }
 
@@ -57,21 +54,13 @@ ListItemBlank {
 
         anchors.fill: parent
 
-        Row {
+        StyledTextLabel {
             Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
             Layout.fillWidth: true
             Layout.leftMargin: root.sideMargin
 
-            spacing: 8
-
-            StyledIconLabel {
-                iconCode: Boolean(root.item[iconRoleName]) ? root.item[iconRoleName] : IconCode.NONE
-            }
-
-            StyledTextLabel {
-                text: root.item[keyRoleName]
-                horizontalAlignment: Text.AlignLeft
-            }
+            text: root.item[keyRoleName]
+            horizontalAlignment: Text.AlignLeft
         }
 
         Loader {
@@ -82,9 +71,7 @@ ListItemBlank {
             Layout.preferredWidth: root.valueItemWidth
             Layout.rightMargin: root.sideMargin
 
-            enabled: root.item[valueEnabledRoleName] !== undefined ? root.item[valueEnabledRoleName] : true
-
-            sourceComponent: !root.readOnly ? privateProperties.componentByType(root.item[valueTypeRole]) : readOnlyComponent
+            sourceComponent: !root.readOnly ? privateProperties.componentByType(root.item.valueType) : readOnlyComponent
 
             onLoaded: {
                 loader.item.val = loader.val
@@ -148,9 +135,9 @@ ListItemBlank {
     }
 
     Component {
-        id: intComp
+        id: numberComp
         IncrementalPropertyControl {
-            id: intControl
+            id: numberControl
 
             property int val
             signal changed(int newVal)
@@ -160,33 +147,9 @@ ListItemBlank {
             currentValue: val
 
             step: 1
-            validator: IntInputValidator {
-                top: intControl.maxValue
-                bottom: intControl.minValue
-            }
 
             onValueEdited: {
-                intControl.changed(newValue)
-            }
-        }
-    }
-
-    Component {
-        id: doubleComp
-        IncrementalPropertyControl {
-            id: doubleControl
-
-            property double val
-            signal changed(double newVal)
-
-            iconMode: iconModeEnum.hidden
-
-            currentValue: val
-
-            step: 1
-
-            onValueEdited: {
-                doubleControl.changed(newValue)
+                numberControl.changed(Number(newValue))
             }
         }
     }

@@ -17,32 +17,11 @@ RadioDelegate {
     property var normalStateFont: ui.theme.tabFont
     property var selectedStateFont: ui.theme.tabBoldFont
 
-    property alias keynav: keynavCtrl
-
     height: 48
 
     spacing: 30
     leftPadding: 0
     rightPadding: 0
-
-    onToggled: {
-        if (!keynavCtrl.active) {
-            keynavCtrl.forceActive()
-        }
-    }
-
-    KeyNavigationControl {
-        id: keynavCtrl
-        name: root.objectName
-
-        onActiveChanged: {
-            if (keynavCtrl.active) {
-                root.forceActiveFocus()
-            }
-        }
-
-        onTriggered: root.toggled()
-    }
 
     background: Item {
         anchors.fill: parent
@@ -53,16 +32,13 @@ RadioDelegate {
 
             color: ui.theme.backgroundPrimaryColor
             opacity: ui.theme.buttonOpacityNormal
-
-            border.color: ui.theme.focusColor
-            border.width: keynavCtrl.active ? 2 : 0
+            border.width: 0
             radius: 2
         }
 
         Item {
             id: backgroundGradientRect
             anchors.fill: parent
-            anchors.margins: 2 //! NOTE margin needed to show focus border
 
             property bool isVertical: orientation === Qt.Vertical
             visible: false
@@ -179,6 +155,11 @@ RadioDelegate {
         State {
             name: "SELECTED"
             when: root.checked
+
+            PropertyChanges {
+                target: backgroundRect
+                visible: false
+            }
 
             PropertyChanges {
                 target: backgroundGradientRect

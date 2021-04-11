@@ -40,14 +40,6 @@ static int actionIndexInGroup(const QAction* action)
     return -1;
 }
 
-static void addMenu(QMenu* child, QMenu* parent)
-{
-#ifdef Q_OS_MAC
-    child->setParent(parent);
-#endif
-    parent->addMenu(child);
-}
-
 DockMenuBar::DockMenuBar(QQuickItem* parent)
     : DockView(parent)
 {
@@ -75,15 +67,14 @@ void DockMenuBar::onActionTriggered(QAction* action)
 {
     QVariantMap data = action->data().toMap();
     int actionIndex = actionIndexInGroup(action);
-    emit actionTriggered(data.value("code").toString(), actionIndex);
+    emit actionTringgered(data.value("code").toString(), actionIndex);
 }
 
 void DockMenuBar::updateMenus()
 {
     QList<QMenu*> menus;
     for (const QVariant& item: m_items) {
-        QMenu* menu = makeMenu(item.toMap());
-        menus << menu;
+        menus << makeMenu(item.toMap());
     }
 
     emit changed(menus);
@@ -102,14 +93,14 @@ QMenu* DockMenuBar::makeMenu(const QVariantMap& menuItem) const
         if (menuMap.value("title").toString().isEmpty()) {
             menu->addSeparator();
         } else if (!menuMap.value("subitems").toList().empty()) {
-            QMenu* subMenu = makeMenu(menuMap);
-            addMenu(subMenu, menu);
+            menu->addMenu(makeMenu(menuMap));
         } else {
             bool isFromGroup = menuMap.value("selectable").toBool();
             menu->addAction(makeAction(menuMap, isFromGroup ? group : nullptr));
         }
     }
 
+    connect(menu, &QMenu::triggered, this, &DockMenuBar::onActionTriggered);
     return menu;
 }
 

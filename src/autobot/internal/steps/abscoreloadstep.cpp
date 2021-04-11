@@ -22,14 +22,9 @@
 
 using namespace mu::autobot;
 
-std::string AbScoreLoadStep::name() const
-{
-    return "LoadScore";
-}
-
-void AbScoreLoadStep::doRun(IAbContextPtr ctx)
+void AbScoreLoadStep::doRun(AbContext ctx)
 {
     AbPaintProvider::instance()->clear();
-    Ret ret = fileScoreController()->openScore(ctx->globalVal<io::path>(IAbContext::Key::FilePath));
-    doFinish(ctx, ret);
+    ctx.ret = fileScoreController()->openScore(ctx.val<io::path>(AbContext::Key::ScoreFile));
+    doFinish(ctx);
 }

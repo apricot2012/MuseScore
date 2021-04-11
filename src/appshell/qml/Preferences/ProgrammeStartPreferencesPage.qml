@@ -4,9 +4,7 @@ import MuseScore.Ui 1.0
 import MuseScore.UiComponents 1.0
 import MuseScore.Preferences 1.0
 
-PreferencesPage {
-    id: root
-
+Item {
     ProgrammeStartPreferencesModel {
         id: programmeStartModel
     }
@@ -36,12 +34,18 @@ PreferencesPage {
                     anchors.verticalCenter: parent.verticalCenter
 
                     width: 220
+                    padding: 0
+                    spacing: 6
 
                     checked: modelData.checked
-                    text: modelData.title
 
                     onClicked: {
                         programmeStartModel.setCurrentStartupMode(model.index)
+                    }
+
+                    StyledTextLabel {
+                        text: modelData.title
+                        horizontalAlignment: Qt.AlignLeft
                     }
                 }
 

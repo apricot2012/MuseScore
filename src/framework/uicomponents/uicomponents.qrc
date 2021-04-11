@@ -46,6 +46,5 @@
         <file>qml/MuseScore/UiComponents/ValueList.qml</file>
         <file>qml/MuseScore/UiComponents/internal/ValueListHeaderItem.qml</file>
         <file>qml/MuseScore/UiComponents/internal/ValueListItem.qml</file>
-        <file>qml/MuseScore/UiComponents/FocusableControl.qml</file>
     </qresource>
 </RCC>

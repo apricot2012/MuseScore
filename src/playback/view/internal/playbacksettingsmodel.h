@@ -23,7 +23,7 @@
 
 #include "modularity/ioc.h"
 #include "actions/iactionsdispatcher.h"
-#include "ui/uitypes.h"
+#include "uicomponents/uicomponentstypes.h"
 #include "playback/iplaybackcontroller.h"
 #include "async/asyncable.h"
 
@@ -56,10 +56,10 @@ private:
 
     void updateCheckedState(const actions::ActionCode& actionCode);
 
-    QString resolveSection(const actions::ActionCode& actionCode) const;
+    std::string resolveSection(const actions::ActionCode& actionCode) const;
     bool isActionEnabled(const actions::ActionCode& actionCode) const;
 
-    QList<ui::MenuItem> m_items;
+    QList<uicomponents::MenuItem> m_items;
 };
 }
 

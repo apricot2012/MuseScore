@@ -24,15 +24,13 @@
 namespace mu::uicomponents {
 class ItemMultiSelectionModel : public QItemSelectionModel
 {
-    Q_OBJECT
-
 public:
     explicit ItemMultiSelectionModel(QAbstractItemModel* parent = nullptr);
 
     void setAllowedModifiers(Qt::KeyboardModifiers modifiers);
 
 public slots:
-    Q_INVOKABLE void select(const QModelIndex& index);
+    void select(const QModelIndex& index);
 
 private:
     Qt::KeyboardModifiers m_allowedModifiers;

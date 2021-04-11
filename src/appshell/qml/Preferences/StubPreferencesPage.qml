@@ -2,12 +2,17 @@ import QtQuick 2.15
 
 import MuseScore.UiComponents 1.0
 
-PreferencesPage {
+Item {
     id: root
 
-    StyledTextLabel {
-        anchors.centerIn: parent
+    Rectangle {
+        anchors.fill: parent
 
-        text: qsTrc("appshell", "Not implemented")
+        color: ui.theme.backgroundSecondaryColor
+
+        StyledTextLabel {
+            anchors.centerIn: parent
+            text: qsTrc("appshell", "Not implemented")
+        }
     }
 }

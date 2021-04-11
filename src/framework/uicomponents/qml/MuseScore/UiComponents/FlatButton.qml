@@ -1,7 +1,7 @@
 import QtQuick 2.15
 import MuseScore.UiComponents 1.0
 
-FocusableControl {
+FocusableItem {
     id: root
 
     property alias icon: buttonIcon.iconCode
@@ -17,6 +17,7 @@ FocusableControl {
     property bool accentButton: false
 
     property int orientation: Qt.Vertical
+    property alias pressAndHoldInterval: mouseArea.pressAndHoldInterval
 
     signal clicked()
     signal pressAndHold()
@@ -33,34 +34,16 @@ FocusableControl {
 
     opacity: root.enabled ? 1.0 : ui.theme.itemOpacityDisabled
 
-    onInternalClicked: {
-        root.clicked()
+    Rectangle {
+        id: backgroundRect
+
+        anchors.fill: parent
+
+        color: normalStateColor
+        opacity: ui.theme.buttonOpacityNormal
+        border.width: 0
+        radius: 3
     }
-
-    onInternalPressAndHold: {
-        root.pressAndHold()
-    }
-
-    onInternalTriggered: {
-        root.clicked()
-    }
-
-    mouseArea.hoverEnabled: true
-    mouseArea.onContainsMouseChanged: {
-        if (!Boolean(root.hint)) {
-            return
-        }
-
-        if (mouseArea.containsMouse) {
-            ui.tooltip.show(this, root.hint)
-        } else {
-            ui.tooltip.hide(this)
-        }
-    }
-
-    background.color: normalStateColor
-    background.opacity: ui.theme.buttonOpacityNormal
-    background.radius: 3
 
     Item {
         id: contentWrapper
@@ -124,13 +107,41 @@ FocusableControl {
         ]
     }
 
+    MouseArea {
+        id: mouseArea
+
+        anchors.fill: parent
+
+        hoverEnabled: true
+
+        onClicked: {
+            root.clicked()
+        }
+
+        onPressAndHold: {
+            root.pressAndHold()
+        }
+
+        onContainsMouseChanged: {
+            if (!Boolean(root.hint)) {
+                return
+            }
+
+            if (containsMouse) {
+                ui.tooltip.show(this, root.hint)
+            } else {
+                ui.tooltip.hide(this)
+            }
+        }
+    }
+
     states: [
         State {
             name: "PRESSED"
             when: mouseArea.pressed
 
             PropertyChanges {
-                target: root.background
+                target: backgroundRect
                 color: pressedStateColor
                 opacity: ui.theme.buttonOpacityHit
             }
@@ -141,7 +152,7 @@ FocusableControl {
             when: mouseArea.containsMouse && !mouseArea.pressed
 
             PropertyChanges {
-                target: root.background
+                target: backgroundRect
                 color: hoveredStateColor
                 opacity: ui.theme.buttonOpacityHover
             }

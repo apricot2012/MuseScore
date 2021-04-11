@@ -32,16 +32,16 @@ public:
     virtual ~AbBaseStep() = default;
 
     Delay delay() const override;
-    void make(const IAbContextPtr& ctx) override;
-    async::Channel<IAbContextPtr> finished() const override;
+    void make(const AbContext& ctx) override;
+    async::Channel<AbContext> finished() const override;
 
 protected:
-    virtual void doRun(IAbContextPtr ctx) = 0;
-    void doFinish(IAbContextPtr ctx, const Ret& ret);
+    virtual void doRun(AbContext ctx) = 0;
+    void doFinish(const AbContext& ctx);
 
 private:
     Delay m_delay = Delay::Fast;
-    async::Channel<IAbContextPtr> m_finished;
+    async::Channel<AbContext> m_finished;
 };
 
 using AbBaseStepPtr = std::shared_ptr<AbBaseStep>;

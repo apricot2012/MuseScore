@@ -28,10 +28,10 @@
 #include "async/asyncable.h"
 #include "notation/notationtypes.h"
 
-#include "ui/view/abstractmenumodel.h"
+#include "uicomponents/view/abstractmenumodel.h"
 
 namespace mu::notation {
-class ViewModeControlModel : public QObject, public ui::AbstractMenuModel
+class ViewModeControlModel : public QObject, public uicomponents::AbstractMenuModel, public async::Asyncable
 {
     Q_OBJECT
 
@@ -57,7 +57,7 @@ private:
     void updateState();
     actions::ActionCode viewModeActionCode(ViewMode viewMode) const;
 
-    ui::MenuItem m_currentViewMode;
+    uicomponents::MenuItem m_currentViewMode;
 };
 }
 

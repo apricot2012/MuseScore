@@ -4,9 +4,7 @@ import MuseScore.Ui 1.0
 import MuseScore.UiComponents 1.0
 import MuseScore.Preferences 1.0
 
-PreferencesPage {
-    id: root
-
+Item {
     UpdatePreferencesModel {
         id: updateModel
     }
@@ -22,7 +20,7 @@ PreferencesPage {
         }
 
         CheckBox {
-            text: qsTrc("appshell", "Check for new version of MuseScore")
+            text: qsTrc("appshell", "Check for new version of Musescore")
 
             visible: updateModel.isAppUpdatable()
             checked: updateModel.needCheckForNewAppVersion

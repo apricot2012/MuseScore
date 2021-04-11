@@ -348,7 +348,6 @@ public:
     static const MStyle* defaultStyleForParts() { return _defaultStyleForParts; }
 
     static bool readDefaultStyle(QString file);
-    static bool readPartStyle(QString filePath);
     static void setDefaultStyle(const MStyle& s) { _defaultStyle = s; }
     static void defaultStyleForPartsHasChanged();
 

@@ -24,34 +24,28 @@
 
 using namespace mu::autobot;
 
-std::string AbDrawRefStep::name() const
+void AbDrawRefStep::doRun(AbContext ctx)
 {
-    return "DrawRef";
-}
-
-void AbDrawRefStep::doRun(IAbContextPtr ctx)
-{
-    io::path scorePath = ctx->globalVal<io::path>(IAbContext::Key::FilePath);
-    io::path filePath = configuration()->fileDrawDataPath(scorePath);
-    Ret ret = fileSystem()->exists(filePath);
-    if (!ret) {
+    io::path scorePath = ctx.val<io::path>(AbContext::Key::ScoreFile);
+    io::path filePath = configuration()->scoreDrawData(scorePath);
+    if (!fileSystem()->exists(filePath)) {
         LOGE() << "failed open file to write draw data, path: " << filePath;
-        doFinish(ctx, ret);
+        doFinish(ctx);
         return;
     }
 
     RetVal<QByteArray> data = fileSystem()->readFile(filePath);
     if (!data.ret) {
         LOGE() << "failed read file, err: " << data.ret << ", file: " << filePath;
-        doFinish(ctx, data.ret);
+        doFinish(ctx);
     }
 
     RetVal<draw::DrawDataPtr> buf = draw::DrawBufferJson::fromJson(data.val);
     if (!buf.ret) {
         LOGE() << "failed parse, err: " << buf.ret.toString() << ", file: " << filePath;
-        doFinish(ctx, buf.ret);
+        doFinish(ctx);
     }
 
-    ctx->setStepVal(IAbContext::Key::RefDrawData, buf.val);
-    doFinish(ctx, make_ret(Ret::Code::Ok));
+    ctx.setVal<draw::DrawDataPtr>(AbContext::Key::RefDrawData, buf.val);
+    doFinish(ctx);
 }

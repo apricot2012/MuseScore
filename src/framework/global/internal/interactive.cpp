@@ -194,19 +194,9 @@ RetVal<bool> Interactive::isOpened(const std::string& uri) const
     return provider()->isOpened(Uri(uri));
 }
 
-RetVal<bool> Interactive::isOpened(const Uri& uri) const
-{
-    return provider()->isOpened(uri);
-}
-
 void Interactive::close(const std::string& uri)
 {
     provider()->close(Uri(uri));
-}
-
-void Interactive::close(const Uri& uri)
-{
-    provider()->close(uri);
 }
 
 ValCh<Uri> Interactive::currentUri() const

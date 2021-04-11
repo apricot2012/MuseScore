@@ -56,7 +56,7 @@ Settings::~Settings()
 
 const Settings::Items& Settings::items() const
 {
-    return m_isTransactionStarted ? m_localSettings : m_items;
+    return m_items;
 }
 
 /**
@@ -79,9 +79,6 @@ void Settings::load()
 void Settings::reset(bool keepDefaultSettings)
 {
     m_settings->clear();
-
-    m_isTransactionStarted = false;
-    m_localSettings.clear();
 
     if (!keepDefaultSettings) {
         QDir(dataPath()).removeRecursively();
@@ -128,12 +125,10 @@ void Settings::setValue(const Key& key, const Val& value)
         return;
     }
 
-    if (!m_isTransactionStarted) {
-        writeValue(key, value);
-    }
+    writeValue(key, value);
 
     if (item.isNull()) {
-        insertNewItem(key, value);
+        m_items[key] = Item{ key, value, value };
     } else {
         item.value = value;
     }
@@ -170,88 +165,14 @@ void Settings::setDefaultValue(const Key& key, const Val& value)
         m_items[key] = Item{ key, value, value };
     } else {
         item.defaultValue = value;
-        item.value.setType(value.type());
     }
-}
-
-void Settings::setCanBeMannualyEdited(const Settings::Key& key, bool canBeMannualyEdited)
-{
-    Item& item = findItem(key);
-
-    if (item.isNull()) {
-        m_items[key] = Item{ key, Val(), Val(), canBeMannualyEdited };
-    } else {
-        item.canBeMannualyEdited = canBeMannualyEdited;
-    }
-}
-
-void Settings::insertNewItem(const Settings::Key& key, const Val& value)
-{
-    Item item = Item{ key, value, value };
-    if (m_isTransactionStarted) {
-        m_localSettings[key] = item;
-    } else {
-        m_items[key] = item;
-    }
-}
-
-void Settings::beginTransaction()
-{
-    if (m_isTransactionStarted) {
-        LOGW() << "Transaction is already started";
-        return;
-    }
-
-    m_localSettings = m_items;
-    m_isTransactionStarted = true;
-}
-
-void Settings::commitTransaction()
-{
-    m_isTransactionStarted = false;
-
-    for (auto it = m_localSettings.begin(); it != m_localSettings.end(); ++it) {
-        Item& item = findItem(it->first);
-        if (item.value == it->second.value) {
-            continue;
-        }
-
-        if (item.isNull()) {
-            insertNewItem(it->first, it->second.value);
-        } else {
-            item.value = it->second.value;
-        }
-
-        writeValue(item.key, item.value);
-    }
-
-    m_localSettings.clear();
-}
-
-void Settings::rollbackTransaction()
-{
-    m_isTransactionStarted = false;
-
-    for (auto it = m_localSettings.begin(); it != m_localSettings.end(); ++it) {
-        Item item = findItem(it->first);
-        if (item.value == it->second.value) {
-            continue;
-        }
-
-        Channel<Val>& channel = findChannel(it->first);
-        channel.send(item.value);
-    }
-
-    m_localSettings.clear();
 }
 
 Settings::Item& Settings::findItem(const Key& key) const
 {
-    Items& items = m_isTransactionStarted ? m_localSettings : m_items;
+    auto it = m_items.find(key);
 
-    auto it = items.find(key);
-
-    if (it == items.end()) {
+    if (it == m_items.end()) {
         static Item null;
         return null;
     }

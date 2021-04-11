@@ -36,12 +36,8 @@ void ScorePreferences::setBackupDirPath(const QString& path)
     m_backupDirPath = path;
 }
 
-QString ScorePreferences::defaultStyleFilePath() const
+QString ScorePreferences::defaultStyleFile() const
 {
-    return m_defaultStyleFilePath;
-}
-
-void ScorePreferences::setDefaultStyleFilePath(const QString& path)
-{
-    m_defaultStyleFilePath = path;
+    // preferences.getString(PREF_SCORE_STYLE_DEFAULTSTYLEFILE)
+    return QString();
 }

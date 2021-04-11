@@ -22,26 +22,28 @@
 #include "modularity/ioc.h"
 
 #include "shortcuts/ishortcutsregister.h"
-#include "ui/iuiactionsregister.h"
+#include "actions/iactionsregister.h"
 
 #include "inotationcontextmenu.h"
 
 namespace mu::notation {
 class NotationContextMenu : public INotationContextMenu
 {
-    INJECT(notation, ui::IUiActionsRegister, actionsRegister)
+    INJECT(notation, shortcuts::IShortcutsRegister, shortcutsRegister)
+    INJECT(notation, actions::IActionsRegister, actionsRegister)
 
 public:
-    ui::MenuItemList items(const ElementType& elementType) const override;
+    uicomponents::MenuItemList items(const ElementType& elementType) const override;
 
 private:
-    ui::MenuItem makeItem(const ui::UiAction& action, const QString& section = "", bool enabled = true, bool checked = false) const;
+    uicomponents::MenuItem makeItem(const actions::ActionItem& action, const std::string& section = "", bool enabled = true,
+                                    bool checked = false) const;
 
-    ui::MenuItemList measureItems() const;
-    ui::MenuItemList pageItems() const;
-    ui::MenuItemList elementItems() const;
+    uicomponents::MenuItemList measureItems() const;
+    uicomponents::MenuItemList pageItems() const;
+    uicomponents::MenuItemList elementItems() const;
 
-    ui::MenuItemList defaultCopyPasteItems() const;
+    uicomponents::MenuItemList defaultCopyPasteItems() const;
 };
 }
 

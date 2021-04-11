@@ -41,6 +41,16 @@ struct Shortcut
     }
 };
 
+enum class ShortcutContext {
+    Undefined = 0,
+    Any,
+    NotationActive,
+    NotationNeedSave,
+    NotationHasSelection,
+    NotationUndoRedo,
+    Playing
+};
+
 using ShortcutList = std::list<Shortcut>;
 }
 

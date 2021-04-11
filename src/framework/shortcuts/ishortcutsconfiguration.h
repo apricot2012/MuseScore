@@ -21,7 +21,6 @@
 
 #include "modularity/imoduleexport.h"
 #include "io/path.h"
-#include "retval.h"
 
 namespace mu::shortcuts {
 class IShortcutsConfiguration : MODULE_EXPORT_INTERFACE
@@ -31,9 +30,7 @@ class IShortcutsConfiguration : MODULE_EXPORT_INTERFACE
 public:
     virtual ~IShortcutsConfiguration() = default;
 
-    virtual ValCh<io::path> shortcutsUserPath() const = 0;
-    virtual void setShortcutsUserPath(const io::path& path) = 0;
-
+    virtual io::path shortcutsUserPath() const = 0;
     virtual io::path shortcutsDefaultPath() const = 0;
 };
 }

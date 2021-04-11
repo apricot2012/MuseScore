@@ -25,19 +25,19 @@
 #include "modularity/ioc.h"
 #include "context/iglobalcontext.h"
 #include "iinteractive.h"
-#include "ui/iuiactionsregister.h"
+#include "actions/iactionsregister.h"
 
 namespace mu::palette {
 class MU4PaletteAdapter : public IPaletteAdapter
 {
     INJECT(palette, context::IGlobalContext, globalContext)
     INJECT(palette, framework::IInteractive, interactive)
-    INJECT(palette, ui::IUiActionsRegister, actionsRegister)
+    INJECT(palette, actions::IActionsRegister, actionsRegister)
 
 public:
     MU4PaletteAdapter();
 
-    const ui::UiAction& getAction(const actions::ActionCode& code) const override;
+    actions::ActionItem getAction(const actions::ActionCode& code) const override;
 
     void showMasterPalette(const QString& selectedPaletteName) override;
     bool isSelected() const override;

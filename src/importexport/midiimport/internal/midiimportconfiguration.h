@@ -28,7 +28,6 @@ public:
     void init();
 
     int midiShortestNote() const override; // ticks
-    void setMidiShortestNote(int ticks) override;
 };
 }
 

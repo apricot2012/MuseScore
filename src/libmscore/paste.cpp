@@ -499,7 +499,7 @@ bool Score::pasteStaff(XmlReader& e, Segment* dst, int dstStaff, Fraction scale)
         Measure* endM = tick2measure(dstTick + tickLen);
         for (int i = dstStaff; i < endStaff; i++) {
             for (Measure* m = dstM; m && m != endM->nextMeasure(); m = m->nextMeasure()) {
-                m->checkMeasure(i, false);
+                m->checkMeasure(i);
             }
         }
         _selection.setRangeTicks(dstTick, dstTick + tickLen, dstStaff, endStaff);

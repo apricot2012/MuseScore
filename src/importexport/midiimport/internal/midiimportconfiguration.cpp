@@ -36,8 +36,3 @@ int MidiImportConfiguration::midiShortestNote() const
 {
     return settings()->value(SHORTEST_NOTE_KEY).toInt();
 }
-
-void MidiImportConfiguration::setMidiShortestNote(int ticks)
-{
-    settings()->setValue(SHORTEST_NOTE_KEY, Val(ticks));
-}

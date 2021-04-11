@@ -35,6 +35,7 @@ set(MODULE_SRC
     ${CMAKE_CURRENT_LIST_DIR}/palettemodule.h
     ${CMAKE_CURRENT_LIST_DIR}/ipaletteadapter.h
     ${CMAKE_CURRENT_LIST_DIR}/ipaletteconfiguration.h
+    ${CMAKE_CURRENT_LIST_DIR}/ipaletteactionscontroller.h
     ${CMAKE_CURRENT_LIST_DIR}/palettetypes.h
     ${CMAKE_CURRENT_LIST_DIR}/internal/palette_config.h
     ${CMAKE_CURRENT_LIST_DIR}/internal/mu4paletteadapter.cpp
@@ -45,8 +46,8 @@ set(MODULE_SRC
     ${CMAKE_CURRENT_LIST_DIR}/internal/paletteconfiguration.h
     ${CMAKE_CURRENT_LIST_DIR}/internal/paletteworkspacesetup.cpp
     ${CMAKE_CURRENT_LIST_DIR}/internal/paletteworkspacesetup.h
-    ${CMAKE_CURRENT_LIST_DIR}/internal/paletteuiactions.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/internal/paletteuiactions.h
+    ${CMAKE_CURRENT_LIST_DIR}/internal/paletteactions.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/internal/paletteactions.h
     ${CMAKE_CURRENT_LIST_DIR}/internal/paletteactionscontroller.cpp
     ${CMAKE_CURRENT_LIST_DIR}/internal/paletteactionscontroller.h
     ${CMAKE_CURRENT_LIST_DIR}/view/paletterootmodel.cpp

@@ -33,10 +33,8 @@ class AbDrawCurrentStep : public AbBaseStep
 public:
     AbDrawCurrentStep(bool isDoSave = false);
 
-    std::string name() const override;
-
 protected:
-    void doRun(IAbContextPtr ctx) override;
+    void doRun(AbContext ctx) override;
 
 private:
 

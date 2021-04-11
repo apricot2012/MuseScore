@@ -27,22 +27,12 @@ mu::io::path AutobotConfiguration::dataPath() const
     return io::path(std::getenv("MU_AUTOBOT_DATA_PATH"));
 }
 
-mu::io::path AutobotConfiguration::filesPath() const
-{
-    return io::path(std::getenv("MU_AUTOBOT_FILES_PATH"));
-}
-
 mu::io::path AutobotConfiguration::drawDataPath() const
 {
     return dataPath() + "/draw_data";
 }
 
-mu::io::path AutobotConfiguration::fileDrawDataPath(const io::path& filePath) const
+mu::io::path AutobotConfiguration::scoreDrawData(const io::path& scorePath) const
 {
-    return drawDataPath() + "/" + io::basename(filePath) + ".json";
-}
-
-mu::io::path AutobotConfiguration::reportsPath() const
-{
-    return dataPath() + "/reports";
+    return drawDataPath() + "/" + io::basename(scorePath) + ".json";
 }

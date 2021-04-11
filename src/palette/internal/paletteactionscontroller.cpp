@@ -19,45 +19,75 @@
 
 #include "paletteactionscontroller.h"
 
-using namespace mu::palette;
-using namespace mu::ui;
+#include "paletteactions.h"
 
-static const mu::UriQuery MASTER_PALETTE_URI("musescore://palette/masterpalette?sync=false");
+using namespace mu::palette;
+using namespace mu::actions;
+using namespace mu::shortcuts;
+
+static std::string MASTER_PALETTE_URI = "musescore://palette/masterpalette";
 
 void PaletteActionsController::init()
 {
     dispatcher()->reg(this, "masterpalette", this, &PaletteActionsController::toggleMasterPalette);
 
-    interactive()->currentUri().ch.onReceive(this, [this](const Uri& uri) {
-        //! NOTE If MasterPalette are not open, then it is reasonably to compare with the current uri,
-        //! so as not to call the more expensive `interactive()->isOpened` method.
-        //! If MasterPalette is open, then we will call `interactive()->isOpened`,
-        //! in case if they suddenly did not close MasterPalette,
-        //! but opened something else on top of MasterPalette.
-        bool isOpened = false;
-        if (!m_masterPaletteOpened.val) {
-            isOpened = uri == MASTER_PALETTE_URI.uri();
-        } else {
-            isOpened = interactive()->isOpened(MASTER_PALETTE_URI.uri()).val;
-        }
-
-        if (isOpened != m_masterPaletteOpened.val) {
-            m_masterPaletteOpened.val = isOpened;
-            m_masterPaletteOpened.ch.send(isOpened);
-        }
-    });
+    setupConnections();
 }
 
 mu::ValCh<bool> PaletteActionsController::isMasterPaletteOpened() const
 {
-    return m_masterPaletteOpened;
+    ValCh<bool> result;
+    result.ch = m_masterPaletteOpenChannel;
+    result.val = interactive()->isOpened(MASTER_PALETTE_URI).val;
+    return result;
+}
+
+bool PaletteActionsController::actionAvailable(const ActionCode& actionCode) const
+{
+    if (!canReceiveAction(actionCode)) {
+        return false;
+    }
+
+    ActionItem action = actionsRegister()->action(actionCode);
+    if (!action.isValid()) {
+        return false;
+    }
+
+    switch (action.shortcutContext) {
+    case ShortcutContext::NotationActive:
+        return isNotationPage();
+    default:
+        break;
+    }
+
+    return true;
+}
+
+mu::async::Channel<ActionCodeList> PaletteActionsController::actionsAvailableChanged() const
+{
+    return m_actionsReceiveAvailableChanged;
+}
+
+void PaletteActionsController::setupConnections()
+{
+    interactive()->currentUri().ch.onReceive(this, [this](const Uri&) {
+        ActionCodeList actionCodes = PaletteActions::actionCodes(ShortcutContext::NotationActive);
+        m_actionsReceiveAvailableChanged.send(actionCodes);
+    });
 }
 
 void PaletteActionsController::toggleMasterPalette()
 {
-    if (interactive()->isOpened(MASTER_PALETTE_URI.uri()).val) {
-        interactive()->close(MASTER_PALETTE_URI.uri());
+    if (interactive()->isOpened(MASTER_PALETTE_URI).val) {
+        interactive()->close(MASTER_PALETTE_URI);
     } else {
-        interactive()->open(MASTER_PALETTE_URI);
+        interactive()->open(MASTER_PALETTE_URI + "?sync=false");
     }
+
+    m_masterPaletteOpenChannel.send(interactive()->isOpened(MASTER_PALETTE_URI).val);
+}
+
+bool PaletteActionsController::isNotationPage() const
+{
+    return interactive()->isOpened("musescore://notation").val;
 }

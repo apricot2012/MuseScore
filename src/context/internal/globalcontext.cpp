@@ -20,7 +20,10 @@
 
 using namespace mu::context;
 using namespace mu::notation;
+using namespace mu::shortcuts;
 using namespace mu::async;
+
+static const mu::Uri NOTATION_PAGE_URI("musescore://notation");
 
 void GlobalContext::addMasterNotation(const IMasterNotationPtr& notation)
 {
@@ -54,12 +57,10 @@ void GlobalContext::setCurrentMasterNotation(const IMasterNotationPtr& masterNot
     }
 
     m_currentMasterNotation = masterNotation;
+    m_currentMasterNotationChanged.notify();
 
     INotationPtr notation = masterNotation ? masterNotation->notation() : nullptr;
-    doSetCurrentNotation(notation);
-
-    m_currentMasterNotationChanged.notify();
-    m_currentNotationChanged.notify();
+    setCurrentNotation(notation);
 }
 
 IMasterNotationPtr GlobalContext::currentMasterNotation() const
@@ -74,7 +75,16 @@ Notification GlobalContext::currentMasterNotationChanged() const
 
 void GlobalContext::setCurrentNotation(const INotationPtr& notation)
 {
-    doSetCurrentNotation(notation);
+    if (m_currentNotation == notation) {
+        return;
+    }
+
+    m_currentNotation = notation;
+
+    if (m_currentNotation) {
+        m_currentNotation->setOpened(true);
+    }
+
     m_currentNotationChanged.notify();
 }
 
@@ -88,15 +98,12 @@ Notification GlobalContext::currentNotationChanged() const
     return m_currentNotationChanged;
 }
 
-void GlobalContext::doSetCurrentNotation(const INotationPtr& notation)
+ShortcutContext GlobalContext::currentShortcutContext() const
 {
-    if (m_currentNotation == notation) {
-        return;
+    if (playbackController()->isPlaying()) {
+        return ShortcutContext::Playing;
+    } else if (interactive()->currentUri().val == NOTATION_PAGE_URI) {
+        return ShortcutContext::NotationActive;
     }
-
-    m_currentNotation = notation;
-
-    if (m_currentNotation) {
-        m_currentNotation->setOpened(true);
-    }
+    return ShortcutContext::Undefined;
 }

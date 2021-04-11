@@ -25,7 +25,7 @@
 #include "async/asyncable.h"
 #include "inotationconfiguration.h"
 #include "workspace/iworkspacemanager.h"
-#include "ui/iuiactionsregister.h"
+#include "actions/iactionsregister.h"
 
 class QItemSelectionModel;
 
@@ -42,7 +42,7 @@ class NoteInputBarCustomiseModel : public QAbstractListModel, public async::Asyn
 
     INJECT(notation, INotationConfiguration, configuration)
     INJECT(notation, workspace::IWorkspaceManager, workspaceManager)
-    INJECT(notation, ui::IUiActionsRegister, actionsRegister)
+    INJECT(notation, actions::IActionsRegister, actionsRegister)
 
     Q_PROPERTY(QItemSelectionModel * selectionModel READ selectionModel NOTIFY selectionChanged)
     Q_PROPERTY(bool isMovingUpAvailable READ isMovingUpAvailable NOTIFY isMovingUpAvailableChanged)
@@ -101,7 +101,7 @@ private:
     void updateRemovingAvailability();
     void updateAddSeparatorAvailability();
 
-    AbstractNoteInputBarItem* makeItem(const ui::UiAction& action, bool checked);
+    AbstractNoteInputBarItem* makeItem(const actions::ActionItem& action, bool checked);
     AbstractNoteInputBarItem* makeSeparatorItem() const;
 
     actions::ActionCodeList customizedActions() const;

@@ -1658,7 +1658,6 @@ static void distributeStaves(Page* page)
     int ngaps { 0 };
     qreal prevYBottom  { page->tm() };
     qreal yBottom      { 0.0 };
-    qreal spacerOffset { 0.0 };
     bool vbox          { false };
     Spacer* nextSpacer { nullptr };
     bool transferNormalBracket { false };
@@ -1723,9 +1722,8 @@ static void distributeStaves(Page* page)
                     vbox = false;
                 }
 
-                prevYBottom  = system->y() + sysStaff->y() + sysStaff->bbox().height();
-                yBottom      = system->y() + sysStaff->y() + sysStaff->skyline().south().max();
-                spacerOffset = sysStaff->skyline().south().max() - sysStaff->bbox().height();
+                prevYBottom = system->y() + sysStaff->y() + sysStaff->bbox().height();
+                yBottom     = system->y() + sysStaff->y() + sysStaff->yBottom();
                 vgdl.append(vgd);
             }
             transferNormalBracket = endNormalBracket >= 0;
@@ -1735,8 +1733,8 @@ static void distributeStaves(Page* page)
     --ngaps;
 
     qreal spaceLeft { page->height() - page->bm() - score->styleP(Sid::staffLowerBorder) - yBottom };
-    if (nextSpacer) {
-        spaceLeft -= qMax(0.0, nextSpacer->gap() - spacerOffset - score->styleP(Sid::staffLowerBorder));
+    if (nextSpacer && (nextSpacer->spacerType() == SpacerType::DOWN)) {
+        spaceLeft -= nextSpacer->gap();
     }
     if (spaceLeft <= 0.0) {
         return;
@@ -5442,7 +5440,7 @@ VerticalGapData::VerticalGapData(bool first, System* sys, Staff* st, SysStaff* s
         _normalisedSpacing = system->score()->styleP(Sid::staffUpperBorder);
         _maxActualSpacing = _normalisedSpacing;
     } else {
-        _normalisedSpacing = system->y() + (sysStaff ? sysStaff->bbox().y() : 0.0) - y;
+        _normalisedSpacing = system->y() + (sysStaff ? sysStaff->y() : 0.0) - y;
         _maxActualSpacing = system->score()->styleP(Sid::maxStaffSpread);
 
         Spacer* spacer { staff ? system->upSpacer(staff->idx(), nextSpacer) : nullptr };

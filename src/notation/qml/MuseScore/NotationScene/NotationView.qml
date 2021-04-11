@@ -33,7 +33,7 @@ FocusScope {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            orientation: notationNavigator.orientation === Qt.Horizontal ? Qt.Vertical : Qt.Horizontal
+            orientation: notationNavigator.orientation
 
             background: Rectangle {
                 color: notationView.backgroundColor

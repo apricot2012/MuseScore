@@ -1002,7 +1002,7 @@ Score::FileError MasterScore::read1(XmlReader& e, bool ignoreVersionError)
                 }
             }
 
-            if (created() && !preferences().defaultStyleFilePath().isEmpty()) {
+            if (created() && !preferences().defaultStyleFile().isEmpty()) {
                 setStyle(MScore::defaultStyle());
             } else {
                 int defaultsVersion = readStyleDefaultsVersion();

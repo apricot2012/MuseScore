@@ -35,7 +35,7 @@ MU4PaletteAdapter::MU4PaletteAdapter()
     m_paletteEnabled.val = true;
 }
 
-const ui::UiAction& MU4PaletteAdapter::getAction(const actions::ActionCode& code) const
+actions::ActionItem MU4PaletteAdapter::getAction(const actions::ActionCode& code) const
 {
     return actionsRegister()->action(code);
 }

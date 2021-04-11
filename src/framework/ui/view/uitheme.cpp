@@ -108,11 +108,6 @@ QColor UiTheme::linkColor() const
     return colorByKey(LINK_COLOR);
 }
 
-QColor UiTheme::focusColor() const
-{
-    return colorByKey(FOCUS_COLOR);
-}
-
 QFont UiTheme::bodyFont() const
 {
     return m_bodyFont;
@@ -218,7 +213,7 @@ qreal UiTheme::realByKey(ThemeStyleKey key) const
     return currentTheme().values[key].toDouble();
 }
 
-const ThemeInfo& UiTheme::currentTheme() const
+ThemeInfo UiTheme::currentTheme() const
 {
     return configuration()->currentTheme();
 }

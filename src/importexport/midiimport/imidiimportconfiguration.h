@@ -32,7 +32,6 @@ public:
     virtual ~IMidiImportConfiguration() = default;
 
     virtual int midiShortestNote() const = 0; //ticks
-    virtual void setMidiShortestNote(int ticks) = 0;
 };
 }
 

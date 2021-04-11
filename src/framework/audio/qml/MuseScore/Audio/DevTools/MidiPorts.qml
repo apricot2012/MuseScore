@@ -41,7 +41,7 @@ Item {
                 anchors.leftMargin: 8
                 height: 40
                 font: ui.theme.bodyBoldFont
-                text: "MIDI output"
+                text: "Midi output"
             }
 
             StyledTextLabel {
@@ -117,7 +117,7 @@ Item {
                 anchors.leftMargin: 8
                 height: 40
                 font: ui.theme.bodyBoldFont
-                text: "MIDI input"
+                text: "Midi input"
             }
 
             StyledTextLabel {
