@@ -63,12 +63,18 @@ DockWindow {
     property AppMenuModel appMenuModel: AppMenuModel {}
     property StartupModel startupModel: StartupModel {}
 
+    property KeyNavigationSection topToolKeyNavSec: KeyNavigationSection {
+        id: keynavSec
+        name: "TopTool"
+        order: 1
+    }
+
     menuBar: DockMenuBar {
         objectName: "mainMenuBar"
 
         items: appMenuModel.items
 
-        onActionTringgered: {
+        onActionTriggered: {
             appMenuModel.handleAction(actionCode, actionIndex)
         }
     }
@@ -82,8 +88,12 @@ DockWindow {
             color: dockWindow.color
             allowedAreas: Qt.TopToolBarArea
 
+            title: qsTrc("appshell", "Main Toolbar")
+
             content: MainToolBar {
                 color: dockWindow.color
+                keynav.section: topToolKeyNavSec
+                keynav.order: 1
                 currentUri: dockWindow.currentPageUri
 
                 onSelected: {
@@ -101,9 +111,15 @@ DockWindow {
             color: dockWindow.color
             allowedAreas: Qt.TopToolBarArea
 
+            title: qsTrc("appshell", "Notation Toolbar")
+
             content: NotationToolBar {
                 id: notationToolBarContent
                 color: dockWindow.color
+
+                keynav.section: topToolKeyNavSec
+                keynav.order: 2
+                keynav.enabled: notationToolBar.visible
 
                 Connections {
                     target: notationToolBar
@@ -126,9 +142,16 @@ DockWindow {
             color: dockWindow.color
             allowedAreas: Qt.TopToolBarArea
 
+            title: qsTrc("appshell", "Playback Controls")
+
             content: PlaybackToolBar {
                 id: playbackToolBarContent
                 color: dockWindow.color
+
+                keynav.section: topToolKeyNavSec
+                keynav.order: 3
+                keynav.enabled: dockWindow.isNotationPage
+
                 floating: playbackToolBar.floating
 
                 Connections {
@@ -143,7 +166,7 @@ DockWindow {
         },
 
         DockToolBar	{
-            id:undoRedoToolBar
+            id: undoRedoToolBar
             objectName: "undoRedoToolBar"
 
             minimumWidth: 72
@@ -152,6 +175,8 @@ DockWindow {
             color: dockWindow.color
             floatable: false
             movable: false
+
+            title: qsTrc("appshell", "Undo/Redo Toolbar")
 
             content: UndoRedoToolBar {
                 id: undoRedoToolBarContent

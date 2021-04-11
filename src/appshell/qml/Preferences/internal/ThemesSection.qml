@@ -30,10 +30,10 @@ Column {
         spacing: 106
 
         delegate: Column {
-            spacing: 16
-
             width: 112
             height: 120
+
+            spacing: 16
 
             ThemeSample {
                 strokeColor: modelData.strokeColor
@@ -42,24 +42,20 @@ Column {
                 fontPrimaryColor: modelData.fontPrimaryColor
                 buttonColor: modelData.buttonColor
                 accentColor: modelData.accentColor
-            }
-
-            RoundedRadioButton {
-                width: parent.width
-                leftPadding: 0
-
-                spacing: 6
-
-                checked: view.currentIndex === model.index
 
                 onClicked: {
                     root.themeChangeRequested(model.index)
                 }
+            }
 
-                StyledTextLabel {
-                    horizontalAlignment: Qt.AlignLeft
+            RoundedRadioButton {
+                width: parent.width
 
-                    text: modelData.title
+                checked: view.currentIndex === model.index
+                text: modelData.title
+
+                onClicked: {
+                    root.themeChangeRequested(model.index)
                 }
             }
         }

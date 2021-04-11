@@ -117,6 +117,17 @@ Notation::Notation(Ms::Score* score)
         notifyAboutNotationChanged();
     });
 
+    configuration()->selectionColorChanged().onReceive(this, [this](int) {
+        notifyAboutNotationChanged();
+    });
+
+    configuration()->canvasOrientation().ch.onReceive(this, [this](framework::Orientation) {
+        m_score->doLayout();
+        for (Ms::Score* score : m_score->scoreList()) {
+            score->doLayout();
+        }
+    });
+
     setScore(score);
 }
 
@@ -150,6 +161,13 @@ void Notation::init()
     Ms::ScoreFont* scoreFont = Ms::ScoreFont::fontFactory("Leland");
     Ms::gscore->setScoreFont(scoreFont);
     Ms::gscore->setNoteHeadWidth(scoreFont->width(Ms::SymId::noteheadBlack, Ms::gscore->spatium()) / Ms::SPATIUM20);
+
+    for (int i = 0; i < VOICES; ++i) {
+        Ms::MScore::selectColor[i] = configuration()->selectionColor(i);
+    }
+
+    Ms::MScore::readDefaultStyle(configuration()->defaultStyleFilePath().toQString());
+    Ms::MScore::readPartStyle(configuration()->partStyleFilePath().toQString());
 }
 
 void Notation::setScore(Ms::Score* score)

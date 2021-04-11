@@ -41,8 +41,6 @@ QString revision;
 
 static const std::string module_name("notation");
 
-static const Settings::Key ANCHORLINE_COLOR(module_name, "ui/score/voice4/color");
-
 static const Settings::Key BACKGROUND_COLOR(module_name, "ui/canvas/background/color");
 static const Settings::Key BACKGROUND_WALLPAPER_PATH(module_name, "ui/canvas/background/wallpaper");
 static const Settings::Key BACKGROUND_USE_COLOR(module_name, "ui/canvas/background/useColor");
@@ -53,9 +51,15 @@ static const Settings::Key FOREGROUND_USE_COLOR(module_name, "ui/canvas/foregrou
 
 static const Settings::Key SELECTION_PROXIMITY(module_name, "ui/canvas/misc/selectionProximity");
 
+static const Settings::Key DEFAULT_ZOOM_TYPE(module_name, "ui/canvas/zoomDefaultType");
+static const Settings::Key DEFAULT_ZOOM(module_name, "ui/canvas/zoomDefaultLevel");
 static const Settings::Key CURRENT_ZOOM(module_name, "ui/canvas/misc/currentZoom");
+static const Settings::Key KEYBOARD_ZOOM_PRECISION(module_name, "ui/canvas/zoomPrecisionKeyboard");
+static const Settings::Key MOUSE_ZOOM_PRECISION(module_name, "ui/canvas/zoomPrecisionMouse");
 
 static const Settings::Key USER_STYLES_PATH(module_name, "application/paths/myStyles");
+static const Settings::Key DEFAULT_STYLE_FILE_PATH(module_name, "score/style/defaultStyleFile");
+static const Settings::Key PART_STYLE_FILE_PATH(module_name, "score/style/partStyleFile");
 
 static const Settings::Key IS_MIDI_INPUT_ENABLED(module_name, "io/midi/enableInput");
 static const Settings::Key IS_AUTOMATICALLY_PAN_ENABLED(module_name, "application/playback/panPlayback");
@@ -66,16 +70,27 @@ static const Settings::Key IS_COUNT_IN_ENABLED(module_name, "application/playbac
 static const Settings::Key TOOLBAR_KEY(module_name, "ui/toolbar/");
 
 static const Settings::Key IS_CANVAS_ORIENTATION_VERTICAL_KEY(module_name, "ui/canvas/scroll/verticalOrientation");
+static const Settings::Key IS_LIMIT_CANVAS_SCROLL_AREA_KEY(module_name, "ui/canvas/scroll/limitScrollArea");
 
 static const Settings::Key ADVANCE_TO_NEXT_NOTE_ON_KEY_RELEASE(module_name, "io/midi/advanceOnRelease");
 static const Settings::Key COLOR_NOTES_OUTSIDE_OF_USABLE_PITCH_RANGE(module_name, "score/note/warnPitchRange");
 static const Settings::Key REALTIME_DELAY(module_name, "io/midi/realtimeDelay");
 static const Settings::Key NOTE_DEFAULT_PLAY_DURATION(module_name, "score/note/defaultPlayDuration");
 
+static const Settings::Key VOICE1_COLOR_KEY(module_name, "ui/score/voice1/color");
+static const Settings::Key VOICE2_COLOR_KEY(module_name, "ui/score/voice2/color");
+static const Settings::Key VOICE3_COLOR_KEY(module_name, "ui/score/voice3/color");
+static const Settings::Key VOICE4_COLOR_KEY(module_name, "ui/score/voice4/color");
+
+static std::map<int, Settings::Key> voicesKeys {
+    { 0, VOICE1_COLOR_KEY },
+    { 1, VOICE2_COLOR_KEY },
+    { 2, VOICE3_COLOR_KEY },
+    { 3, VOICE4_COLOR_KEY }
+};
+
 void NotationConfiguration::init()
 {
-    settings()->setDefaultValue(ANCHORLINE_COLOR, Val(QColor("#C31989")));
-
     settings()->setDefaultValue(BACKGROUND_USE_COLOR, Val(true));
     settings()->valueChanged(BACKGROUND_USE_COLOR).onReceive(nullptr, [this](const Val&) {
         m_backgroundChanged.notify();
@@ -106,6 +121,10 @@ void NotationConfiguration::init()
         m_foregroundChanged.notify();
     });
 
+    settings()->setDefaultValue(DEFAULT_ZOOM_TYPE, Val(static_cast<int>(ZoomType::Percentage)));
+    settings()->setDefaultValue(DEFAULT_ZOOM, Val(100));
+    settings()->setDefaultValue(KEYBOARD_ZOOM_PRECISION, Val(2));
+    settings()->setDefaultValue(MOUSE_ZOOM_PRECISION, Val(6));
     settings()->setDefaultValue(CURRENT_ZOOM, Val(100));
     settings()->valueChanged(CURRENT_ZOOM).onReceive(nullptr, [this](const Val& val) {
         m_currentZoomChanged.send(val.toInt());
@@ -113,7 +132,7 @@ void NotationConfiguration::init()
 
     settings()->setDefaultValue(USER_STYLES_PATH, Val(globalConfiguration()->sharePath().toStdString() + "Styles"));
     settings()->valueChanged(USER_STYLES_PATH).onReceive(nullptr, [this](const Val& val) {
-        m_stylesPathChnaged.send(val.toString());
+        m_stylesPathChanged.send(val.toString());
     });
 
     settings()->setDefaultValue(SELECTION_PROXIMITY, Val(6));
@@ -128,15 +147,36 @@ void NotationConfiguration::init()
         m_canvasOrientationChanged.send(canvasOrientation().val);
     });
 
+    settings()->setDefaultValue(IS_LIMIT_CANVAS_SCROLL_AREA_KEY, Val(false));
+
     settings()->setDefaultValue(ADVANCE_TO_NEXT_NOTE_ON_KEY_RELEASE, Val(true));
     settings()->setDefaultValue(COLOR_NOTES_OUTSIDE_OF_USABLE_PITCH_RANGE, Val(true));
     settings()->setDefaultValue(REALTIME_DELAY, Val(750));
     settings()->setDefaultValue(NOTE_DEFAULT_PLAY_DURATION, Val(300));
 
+    std::vector<std::pair<Settings::Key, QColor> > voicesColors {
+        { VOICE1_COLOR_KEY, QColor(0x0065BF) },
+        { VOICE2_COLOR_KEY, QColor(0x007F00) },
+        { VOICE3_COLOR_KEY, QColor(0xC53F00) },
+        { VOICE4_COLOR_KEY, QColor(0xC31989) }
+    };
+
+    for (int i = 0; i < static_cast<int>(voicesColors.size()); ++i) {
+        Settings::Key key = voicesColors[i].first;
+        QColor color = voicesColors[i].second;
+        settings()->setDefaultValue(key, Val(color));
+        settings()->setCanBeMannualyEdited(key, true);
+        settings()->valueChanged(key).onReceive(nullptr, [this, i](const Val& color) {
+            Ms::MScore::selectColor[i] = color.toQColor();
+            m_selectionColorChanged.send(i);
+        });
+    }
+
     fileSystem()->makePath(stylesPath().val);
 
     // libmscore
     preferences().setBackupDirPath(globalConfiguration()->backupPath().toQString());
+    preferences().setDefaultStyleFilePath(defaultStyleFilePath().toQString());
 
     Ms::MScore::warnPitchRange = colorNotesOusideOfUsablePitchRange();
     Ms::MScore::defaultPlayDuration = notePlayDurationMilliseconds();
@@ -144,7 +184,7 @@ void NotationConfiguration::init()
 
 QColor NotationConfiguration::anchorLineColor() const
 {
-    return settings()->value(ANCHORLINE_COLOR).toQColor();
+    return selectionColor(3);
 }
 
 QColor NotationConfiguration::backgroundColor() const
@@ -258,12 +298,51 @@ QColor NotationConfiguration::selectionColor(int voiceIndex) const
         return QColor();
     }
 
-    return Ms::MScore::selectColor[voiceIndex];
+    return settings()->value(voicesKeys[voiceIndex]).toQColor();
+}
+
+void NotationConfiguration::setSelectionColor(int voiceIndex, const QColor& color)
+{
+    if (!isVoiceIndexValid(voiceIndex)) {
+        return;
+    }
+
+    settings()->setValue(voicesKeys[voiceIndex], Val(color));
+}
+
+async::Channel<int> NotationConfiguration::selectionColorChanged()
+{
+    return m_selectionColorChanged;
 }
 
 int NotationConfiguration::selectionProximity() const
 {
     return settings()->value(SELECTION_PROXIMITY).toInt();
+}
+
+void NotationConfiguration::setSelectionProximity(int proxymity)
+{
+    settings()->setValue(SELECTION_PROXIMITY, Val(proxymity));
+}
+
+ZoomType NotationConfiguration::defaultZoomType() const
+{
+    return static_cast<ZoomType>(settings()->value(DEFAULT_ZOOM_TYPE).toInt());
+}
+
+void NotationConfiguration::setDefaultZoomType(ZoomType zoomType)
+{
+    settings()->setValue(DEFAULT_ZOOM_TYPE, Val(static_cast<int>(zoomType)));
+}
+
+int NotationConfiguration::defaultZoom() const
+{
+    return settings()->value(DEFAULT_ZOOM).toInt();
+}
+
+void NotationConfiguration::setDefaultZoom(int zoomPercentage)
+{
+    settings()->setValue(DEFAULT_ZOOM, Val(zoomPercentage));
 }
 
 mu::ValCh<int> NotationConfiguration::currentZoom() const
@@ -280,6 +359,16 @@ void NotationConfiguration::setCurrentZoom(int zoomPercentage)
     settings()->setValue(CURRENT_ZOOM, Val(zoomPercentage));
 }
 
+int NotationConfiguration::mouseZoomPrecision() const
+{
+    return settings()->value(MOUSE_ZOOM_PRECISION).toInt();
+}
+
+void NotationConfiguration::setMouseZoomPrecision(int precision)
+{
+    settings()->setValue(MOUSE_ZOOM_PRECISION, Val(precision));
+}
+
 std::string NotationConfiguration::fontFamily() const
 {
     return uiConfiguration()->fontFamily();
@@ -293,7 +382,7 @@ int NotationConfiguration::fontSize() const
 ValCh<io::path> NotationConfiguration::stylesPath() const
 {
     ValCh<io::path> result;
-    result.ch = m_stylesPathChnaged;
+    result.ch = m_stylesPathChanged;
     result.val = settings()->value(USER_STYLES_PATH).toString();
 
     return result;
@@ -302,6 +391,27 @@ ValCh<io::path> NotationConfiguration::stylesPath() const
 void NotationConfiguration::setStylesPath(const io::path& path)
 {
     settings()->setValue(USER_STYLES_PATH, Val(path.toStdString()));
+}
+
+io::path NotationConfiguration::defaultStyleFilePath() const
+{
+    return settings()->value(DEFAULT_STYLE_FILE_PATH).toString();
+}
+
+void NotationConfiguration::setDefaultStyleFilePath(const io::path& path)
+{
+    preferences().setDefaultStyleFilePath(path.toQString());
+    settings()->setValue(DEFAULT_STYLE_FILE_PATH, Val(path.toStdString()));
+}
+
+io::path NotationConfiguration::partStyleFilePath() const
+{
+    return settings()->value(PART_STYLE_FILE_PATH).toString();
+}
+
+void NotationConfiguration::setPartStyleFilePath(const io::path& path)
+{
+    settings()->setValue(PART_STYLE_FILE_PATH, Val(path.toStdString()));
 }
 
 bool NotationConfiguration::isMidiInputEnabled() const
@@ -371,6 +481,11 @@ std::string NotationConfiguration::notationRevision() const
     return Ms::revision.toStdString();
 }
 
+int NotationConfiguration::notationDivision() const
+{
+    return Ms::MScore::division;
+}
+
 std::vector<std::string> NotationConfiguration::toolbarActions(const std::string& toolbarName) const
 {
     return parseToolbarActions(settings()->value(toolbarSettingsKey(toolbarName)).toString());
@@ -400,7 +515,19 @@ ValCh<Orientation> NotationConfiguration::canvasOrientation() const
 void NotationConfiguration::setCanvasOrientation(Orientation orientation)
 {
     bool isVertical = orientation == Orientation::Vertical;
+    Ms::MScore::setVerticalOrientation(isVertical);
+
     settings()->setValue(IS_CANVAS_ORIENTATION_VERTICAL_KEY, Val(isVertical));
+}
+
+bool NotationConfiguration::isLimitCanvasScrollArea() const
+{
+    return settings()->value(IS_LIMIT_CANVAS_SCROLL_AREA_KEY).toBool();
+}
+
+void NotationConfiguration::setIsLimitCanvasScrollArea(bool limited)
+{
+    settings()->setValue(IS_LIMIT_CANVAS_SCROLL_AREA_KEY, Val(limited));
 }
 
 std::vector<std::string> NotationConfiguration::parseToolbarActions(const std::string& actions) const

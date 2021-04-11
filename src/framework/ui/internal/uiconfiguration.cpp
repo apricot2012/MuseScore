@@ -36,6 +36,7 @@ static const QMap<ThemeStyleKey, QVariant> LIGHT_THEME_VALUES {
     { FONT_PRIMARY_COLOR, "#111132" },
     { FONT_SECONDARY_COLOR, "#FFFFFF" },
     { LINK_COLOR, "#70AFEA" },
+    { FOCUS_COLOR, "#75507b" },
 
     { ACCENT_OPACITY_NORMAL, 0.3 },
     { ACCENT_OPACITY_HOVER, 0.15 },
@@ -59,6 +60,7 @@ static const QMap<ThemeStyleKey, QVariant> DARK_THEME_VALUES {
     { FONT_PRIMARY_COLOR, "#EBEBEB" },
     { FONT_SECONDARY_COLOR, "#BDBDBD" },
     { LINK_COLOR, "#70AFEA" },
+    { FOCUS_COLOR, "#75507b" },
 
     { ACCENT_OPACITY_NORMAL, 0.8 },
     { ACCENT_OPACITY_HOVER, 1.0 },
@@ -82,6 +84,7 @@ static const QMap<ThemeStyleKey, QVariant> HIGH_CONTRAST_THEME_VALUES {
     { FONT_PRIMARY_COLOR, "#FFFFFF" },
     { FONT_SECONDARY_COLOR, "#FFFFFF" },
     { LINK_COLOR, "#70AFEA" },
+    { FOCUS_COLOR, "#75507b" },
 
     { ACCENT_OPACITY_NORMAL, 0.3 },
     { ACCENT_OPACITY_HOVER, 0.15 },
@@ -104,6 +107,7 @@ void UiConfiguration::init()
     settings()->setDefaultValue(UI_MUSICAL_FONT_SIZE_KEY, Val(12));
 
     settings()->valueChanged(UI_THEMES_KEY).onReceive(nullptr, [this](const Val&) {
+        updateThemes();
         notifyAboutCurrentThemeChanged();
     });
 
@@ -152,18 +156,40 @@ bool UiConfiguration::needFollowSystemTheme() const
 
 void UiConfiguration::initThemes()
 {
-    if (needFollowSystemTheme()) {
-        platformTheme()->startListening();
-    }
-
-    platformTheme()->darkModeSwitched().onReceive(nullptr, [this](bool) {
+    platformTheme()->themeCodeChanged().onReceive(nullptr, [this](ThemeCode) {
         notifyAboutCurrentThemeChanged();
     });
 
-    for (const std::string& codeKey : allStandardThemeCodes()) {
+    for (const ThemeCode& codeKey : allStandardThemeCodes()) {
         m_themes.push_back(makeStandardTheme(codeKey));
     }
 
+    updateThemes();
+    updateCurrentTheme();
+}
+
+void UiConfiguration::updateCurrentTheme()
+{
+    if (needFollowSystemTheme()) {
+        platformTheme()->startListening();
+    } else {
+        platformTheme()->stopListening();
+    }
+
+    ThemeCode currentCodeKey = currentThemeCodeKey();
+
+    for (size_t i = 0; i < m_themes.size(); ++i) {
+        if (m_themes[i].codeKey == currentCodeKey) {
+            m_currentThemeIndex = i;
+            break;
+        }
+    }
+
+    platformTheme()->applyPlatformStyleOnAppForTheme(currentCodeKey);
+}
+
+void UiConfiguration::updateThemes()
+{
     ThemeList modifiedThemes = readThemes();
 
     for (ThemeInfo& theme: m_themes) {
@@ -176,22 +202,6 @@ void UiConfiguration::initThemes()
             theme = *it;
         }
     }
-
-    updateCurrentTheme();
-}
-
-void UiConfiguration::updateCurrentTheme()
-{
-    std::string currentCodeKey = currentThemeCodeKey();
-
-    for (size_t i = 0; i < m_themes.size(); ++i) {
-        if (m_themes[i].codeKey == currentCodeKey) {
-            m_currentThemeIndex = i;
-            break;
-        }
-    }
-
-    platformTheme()->setAppThemeDark(currentCodeKey == DARK_THEME_CODE);
 }
 
 void UiConfiguration::notifyAboutCurrentThemeChanged()
@@ -200,7 +210,7 @@ void UiConfiguration::notifyAboutCurrentThemeChanged()
     m_currentThemeChanged.notify();
 }
 
-ThemeInfo UiConfiguration::makeStandardTheme(const std::string& codeKey) const
+ThemeInfo UiConfiguration::makeStandardTheme(const ThemeCode& codeKey) const
 {
     ThemeInfo theme;
     theme.codeKey = codeKey;
@@ -266,34 +276,63 @@ void UiConfiguration::writeThemes(const ThemeList& themes)
     settings()->setValue(UI_THEMES_KEY, value);
 }
 
+ThemeList UiConfiguration::themes() const
+{
+    return m_themes;
+}
+
 QStringList UiConfiguration::possibleFontFamilies() const
 {
     QFontDatabase db;
     return db.families();
 }
 
-ThemeList UiConfiguration::themes() const
+QStringList UiConfiguration::possibleAccentColors() const
 {
-    return m_themes;
+    static const QStringList lightAccentColors {
+        "#F36565",
+        "#F39048",
+        "#FFC52F",
+        "#63D47B",
+        "#70AFEA",
+        "#A488F2",
+        "#F87BDC"
+    };
+
+    static const QStringList darkAccentColors {
+        "#F25555",
+        "#E1720B",
+        "#AC8C1A",
+        "#27A341",
+        "#2093FE",
+        "#926BFF",
+        "#E454C4"
+    };
+
+    if (currentTheme().codeKey == DARK_THEME_CODE) {
+        return darkAccentColors;
+    }
+
+    return lightAccentColors;
 }
 
-ThemeInfo UiConfiguration::currentTheme() const
+const ThemeInfo& UiConfiguration::currentTheme() const
 {
     return m_themes[m_currentThemeIndex];
 }
 
-std::string UiConfiguration::currentThemeCodeKey() const
+ThemeCode UiConfiguration::currentThemeCodeKey() const
 {
-    std::string preferredThemeCode = settings()->value(UI_CURRENT_THEME_CODE_KEY).toString();
-
     if (needFollowSystemTheme()) {
-        return platformTheme()->isDarkMode() ? DARK_THEME_CODE : LIGHT_THEME_CODE;
+        return platformTheme()->themeCode();
     }
+
+    ThemeCode preferredThemeCode = settings()->value(UI_CURRENT_THEME_CODE_KEY).toString();
 
     return preferredThemeCode.empty() ? LIGHT_THEME_CODE : preferredThemeCode;
 }
 
-void UiConfiguration::setCurrentTheme(const std::string& codeKey)
+void UiConfiguration::setCurrentTheme(const ThemeCode& codeKey)
 {
     settings()->setValue(UI_CURRENT_THEME_CODE_KEY, Val(codeKey));
 }
@@ -465,7 +504,7 @@ Notification UiConfiguration::pageStateChanged() const
 
 void UiConfiguration::applyPlatformStyle(QWidget* window)
 {
-    platformTheme()->applyPlatformStyle(window);
+    platformTheme()->applyPlatformStyleOnWindowForTheme(window, currentThemeCodeKey());
 }
 
 QByteArray UiConfiguration::stringToByteArray(const std::string& string) const

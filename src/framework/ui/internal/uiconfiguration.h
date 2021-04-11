@@ -39,11 +39,12 @@ public:
     void init();
     void deinit();
 
-    QStringList possibleFontFamilies() const override;
     ThemeList themes() const override;
+    QStringList possibleFontFamilies() const override;
+    QStringList possibleAccentColors() const override;
 
-    ThemeInfo currentTheme() const override;
-    void setCurrentTheme(const std::string& codeKey) override;
+    const ThemeInfo& currentTheme() const override;
+    void setCurrentTheme(const ThemeCode& codeKey) override;
     void setCurrentThemeStyleValue(ThemeStyleKey key, const Val& val) override;
     async::Notification currentThemeChanged() const override;
 
@@ -78,9 +79,10 @@ private:
     void initThemes();
     void notifyAboutCurrentThemeChanged();
     void updateCurrentTheme();
+    void updateThemes();
 
-    std::string currentThemeCodeKey() const;
-    ThemeInfo makeStandardTheme(const std::string& codeKey) const;
+    ThemeCode currentThemeCodeKey() const;
+    ThemeInfo makeStandardTheme(const ThemeCode& codeKey) const;
 
     ThemeList readThemes() const;
     void writeThemes(const ThemeList& themes);

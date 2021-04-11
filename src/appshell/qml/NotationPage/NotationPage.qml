@@ -23,6 +23,12 @@ DockPage {
 
     property NotationPageModel pageModel: NotationPageModel {}
 
+    property KeyNavigationSection noteInputKeyNavSec: KeyNavigationSection {
+        id: keynavSec
+        name: "NoteInputSection"
+        order: 2
+    }
+
     function updatePageState() {
         var states = [
                     {"Palette": palettePanel.visible},
@@ -57,9 +63,13 @@ DockPage {
 
         color: notationPage.color
 
+        title: qsTrc("appshell", "Note Input")
+
         content: NoteInputBar {
             color: notationNoteInputBar.color
             orientation: notationNoteInputBar.orientation
+            keynav.section: noteInputKeyNavSec
+            keynav.order: 1
         }
     }
 
@@ -119,7 +129,7 @@ DockPage {
             id: inspectorPanel
             objectName: "inspectorPanel"
 
-            title: qsTrc("appshell", "Inspector")
+            title: qsTrc("appshell", "Properties")
 
             width: defaultPanelWidth
             minimumWidth: minimumPanelWidth

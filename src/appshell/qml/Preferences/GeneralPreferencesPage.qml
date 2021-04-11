@@ -5,10 +5,8 @@ import MuseScore.Ui 1.0
 import MuseScore.UiComponents 1.0
 import MuseScore.Preferences 1.0
 
-Item {
+PreferencesPage {
     id: root
-
-    signal hideRequested()
 
     Component.onCompleted: {
         preferencesModel.load()
@@ -16,12 +14,6 @@ Item {
 
     GeneralPreferencesModel {
         id: preferencesModel
-    }
-
-    Rectangle {
-        anchors.fill: parent
-
-        color: ui.theme.backgroundSecondaryColor
     }
 
     Column {

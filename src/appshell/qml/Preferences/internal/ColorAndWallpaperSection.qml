@@ -1,5 +1,5 @@
 import QtQuick 2.15
-import QtQuick.Layouts 1.12
+import QtQuick.Layouts 1.15
 
 import MuseScore.UiComponents 1.0
 
@@ -40,18 +40,11 @@ Column {
         RoundedRadioButton {
             implicitWidth: root.firstColumnWidth
 
-            padding: 0
-            spacing: 6
-
             checked: root.useColor
+            text: qsTrc("appshell", "Colour:")
 
             onClicked: {
                 root.useColorChangeRequested(true)
-            }
-
-            StyledTextLabel {
-                horizontalAlignment: Qt.AlignLeft
-                text: qsTrc("appshell", "Colour:")
             }
         }
 
@@ -70,18 +63,11 @@ Column {
         RoundedRadioButton {
             implicitWidth: root.firstColumnWidth
 
-            padding: 0
-            spacing: 6
-
             checked: !root.useColor
+            text: qsTrc("appshell", "Wallpaper:")
 
             onClicked: {
                 root.useColorChangeRequested(false)
-            }
-
-            StyledTextLabel {
-                horizontalAlignment: Qt.AlignLeft
-                text: qsTrc("appshell", "Wallpaper:")
             }
         }
 

@@ -1,12 +1,11 @@
 import QtQuick 2.15
-import QtQuick.Layouts 1.12
 
 import MuseScore.UiComponents 1.0
 
 Column {
     id: root
 
-    property var allFonts: []
+    property alias allFonts: selectFontControl.model
 
     property alias currentFontIndex: selectFontControl.currentIndex
     property alias bodyTextSize: bodyTextSizeControl.currentValue
@@ -23,66 +22,28 @@ Column {
         font: ui.theme.bodyBoldFont
     }
 
-    GridLayout {
-        rows: 2
-        columns: 2
+    Column {
+        spacing: 8
 
-        rowSpacing: 8
-        columnSpacing: 0
-
-        Item {
-            width: root.firstColumnWidth
-            height: childrenRect.height
-
-            StyledTextLabel {
-                horizontalAlignment: Qt.AlignLeft
-                text: qsTrc("appshell", "Font face:")
-            }
-        }
-
-        StyledComboBox {
+        ComboBoxWithTitle {
             id: selectFontControl
 
-            implicitWidth: 208
+            title: qsTrc("appshell", "Font face:")
+            titleWidth: root.firstColumnWidth
 
-            textRoleName: "text"
-            valueRoleName: "value"
-
-            model: {
-                var result = []
-
-                for (var i = 0; i < root.allFonts.length; ++i) {
-                    result.push({"text" : root.allFonts[i], "value" : root.allFonts[i]})
-                }
-
-                return result
-            }
-
-            onActivated: {
-                root.fontChangeRequested(index)
+            onValueEdited: {
+                root.fontChangeRequested(currentIndex)
             }
         }
 
-        Item {
-            width: root.firstColumnWidth
-            height: childrenRect.height
-
-            StyledTextLabel {
-                horizontalAlignment: Qt.AlignLeft
-                text: qsTrc("appshell", "Body text size:")
-            }
-        }
-
-        IncrementalPropertyControl {
+        IncrementalPropertyControlWithTitle {
             id: bodyTextSizeControl
 
-            implicitWidth: 112
+            title: qsTrc("appshell", "Body text size:")
+            titleWidth: root.firstColumnWidth
 
-            minValue: 0
-            maxValue: 100
-            decimals: 0
-            step: 1
-
+            minValue: 8
+            maxValue: 24
             measureUnitsSymbol: qsTrc("appshell", "pt")
 
             onValueEdited: {

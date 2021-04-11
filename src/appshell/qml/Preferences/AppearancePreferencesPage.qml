@@ -1,22 +1,14 @@
 import QtQuick 2.15
-import QtQuick.Controls 2.15
 
 import MuseScore.UiComponents 1.0
 import MuseScore.Preferences 1.0
 
 import "internal"
 
-Flickable {
+PreferencesPage {
     id: root
 
-    contentWidth: width
     contentHeight: content.height
-
-    clip: true
-    boundsBehavior: Flickable.StopAtBounds
-    interactive: height < contentHeight
-
-    ScrollBar.vertical: StyledScrollBar {}
 
     AppearancePreferencesModel {
         id: appearanceModel
@@ -46,7 +38,7 @@ Flickable {
         AccentColorsSection {
             width: parent.width
 
-            colors: appearanceModel.accentColorSamples()
+            colors: appearanceModel.accentColors
             currentColorIndex: appearanceModel.currentAccentColorIndex
             firstColumnWidth: parent.firstColumnWidth
 
@@ -58,8 +50,6 @@ Flickable {
         SeparatorLine {}
 
         UiFontSection {
-            width: parent.width
-
             allFonts: appearanceModel.allFonts()
             currentFontIndex: appearanceModel.currentFontIndex
             bodyTextSize: appearanceModel.bodyTextSize
@@ -97,7 +87,7 @@ Flickable {
             }
 
             onWallpaperPathChangeRequested: {
-                appearanceModel.backgroundWallpaperPath = wallpaperPath
+                appearanceModel.backgroundWallpaperPath = newWallpaperPath
             }
         }
 

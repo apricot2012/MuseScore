@@ -23,7 +23,6 @@
 #include <QQuickItem>
 
 #include "uicomponents/view/qmllistproperty.h"
-#include "uicomponents/uicomponentstypes.h"
 #include "dockpage.h"
 #include "dockmenubar.h"
 
@@ -32,6 +31,7 @@
 class QMainWindow;
 class QStackedWidget;
 class QStatusBar;
+class QMenuBar;
 
 namespace mu::dock {
 class EventsWatcher;
@@ -68,6 +68,7 @@ public:
     QString currentPageUri() const;
 
     QMainWindow* qMainWindow() override;
+    QMenuBar* qMenuBar();
     void stackUnder(QWidget* w) override;
 
 public slots:

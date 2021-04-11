@@ -73,19 +73,37 @@ public:
     int cursorOpacity() const override;
 
     QColor selectionColor(int voiceIndex = 0) const override;
+    void setSelectionColor(int voiceIndex, const QColor& color) override;
+    async::Channel<int> selectionColorChanged() override;
 
     QColor layoutBreakColor() const override;
 
     int selectionProximity() const override;
+    void setSelectionProximity(int proxymity) override;
+
+    ZoomType defaultZoomType() const override;
+    void setDefaultZoomType(ZoomType zoomType) override;
+
+    int defaultZoom() const override;
+    void setDefaultZoom(int zoomPercentage) override;
 
     ValCh<int> currentZoom() const override;
     void setCurrentZoom(int zoomPercentage) override;
+
+    int mouseZoomPrecision() const override;
+    void setMouseZoomPrecision(int precision) override;
 
     std::string fontFamily() const override;
     int fontSize() const override;
 
     ValCh<io::path> stylesPath() const override;
     void setStylesPath(const io::path& path) override;
+
+    io::path defaultStyleFilePath() const override;
+    void setDefaultStyleFilePath(const io::path& path) override;
+
+    io::path partStyleFilePath() const override;
+    void setPartStyleFilePath(const io::path& path) override;
 
     bool isMidiInputEnabled() const override;
     void setIsMidiInputEnabled(bool enabled) override;
@@ -106,12 +124,16 @@ public:
     float notationScaling() const override;
 
     std::string notationRevision() const override;
+    int notationDivision() const override;
 
     std::vector<std::string> toolbarActions(const std::string& toolbarName) const override;
     void setToolbarActions(const std::string& toolbarName, const std::vector<std::string>& actions) override;
 
     ValCh<framework::Orientation> canvasOrientation() const override;
     void setCanvasOrientation(framework::Orientation orientation) override;
+
+    bool isLimitCanvasScrollArea() const override;
+    void setIsLimitCanvasScrollArea(bool limited) override;
 
     bool advanceToNextNoteOnKeyRelease() const override;
     void setAdvanceToNextNoteOnKeyRelease(bool value) override;
@@ -134,7 +156,8 @@ private:
     async::Notification m_foregroundChanged;
     async::Channel<int> m_currentZoomChanged;
     async::Channel<framework::Orientation> m_canvasOrientationChanged;
-    async::Channel<io::path> m_stylesPathChnaged;
+    async::Channel<io::path> m_stylesPathChanged;
+    async::Channel<int> m_selectionColorChanged;
 };
 }
 

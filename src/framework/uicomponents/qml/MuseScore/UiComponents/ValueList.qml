@@ -18,8 +18,14 @@ Item {
     property string keyTitle: qsTrc("uicomponents", "Key")
     property string valueRoleName: "value"
     property string valueTitle: qsTrc("uicomponents", "Value")
+    property string valueTypeRole: "valueType"
+    property string valueEnabledRoleName: "enabled"
+    property string iconRoleName: "icon"
 
-    signal clicked(int index)
+    property alias hasSelection: selectionModel.hasSelection
+    readonly property var selection: sortFilterProxyModel.mapSelectionToSource(selectionModel.selection)
+
+    signal doubleClicked(var index, var item)
 
     QtObject {
         id: privateProperties
@@ -36,6 +42,8 @@ Item {
             } else {
                 setSorterEnabled(sorter, false)
             }
+
+            selectionModel.clear()
         }
 
         function setSorterEnabled(sorter, enable) {
@@ -65,6 +73,12 @@ Item {
                 roleName: valueRoleName
             }
         ]
+    }
+
+    ItemMultiSelectionModel {
+        id: selectionModel
+
+        model: sortFilterProxyModel
     }
 
     RowLayout {
@@ -137,9 +151,16 @@ Item {
 
         delegate: ValueListItem {
             item: model
+
+            property var modelIndex: sortFilterProxyModel.index(item.index, 0)
+
             keyRoleName: root.keyRoleName
             valueRoleName: root.valueRoleName
+            valueTypeRole: root.valueTypeRole
+            valueEnabledRoleName: root.valueEnabledRoleName
+            iconRoleName: root.iconRoleName
 
+            isSelected: selectionModel.hasSelection && selectionModel.isSelected(modelIndex)
             readOnly: root.readOnly
 
             spacing: privateProperties.spacing
@@ -147,7 +168,11 @@ Item {
             valueItemWidth: privateProperties.valueItemWidth
 
             onClicked: {
-                root.clicked(index)
+                selectionModel.select(modelIndex)
+            }
+
+            onDoubleClicked: {
+                root.doubleClicked(sortFilterProxyModel.mapToSource(modelIndex), item)
             }
         }
     }
